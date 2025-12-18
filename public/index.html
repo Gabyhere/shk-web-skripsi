@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Login Sekolah - SHK</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="login-box">
+      <h2>Login Sekolah</h2>
+
+      <form id="loginForm">
+        <label for="loginRole">Login sebagai:</label>
+        <select id="loginRole" required>
+          <option value="siswa">Siswa (Kelas 4-6)</option>
+          <option value="class_account">Akun Kelas (1-3)</option>
+          <option value="guru">Guru</option>
+          <option value="admin">Admin</option>
+        </select>
+
+        <!-- Email field (untuk siswa, guru, admin) -->
+        <div id="emailField">
+          <label>Email:</label>
+          <input type="email" id="loginEmail" />
+        </div>
+
+        <!-- Username field (untuk akun kelas) -->
+        <div id="usernameField" style="display: none">
+          <label>Username:</label>
+          <input type="text" id="loginUsername" placeholder="Contoh: kelas_1A" />
+        </div>
+
+        <label>Password:</label>
+        <input type="password" id="loginPassword" required />
+
+        <button type="submit">Login</button>
+      </form>
+
+      <footer>
+        <p style="font-size: 12px; color: #666; margin-top: 15px">
+          Belum punya akun? Hubungi admin sekolah untuk pendaftaran.
+        </p>
+      </footer>
+    </div>
+
+    <script>
+      function toggleLoginFields() {
+        const role = document.getElementById('loginRole').value;
+        const emailField = document.getElementById('emailField');
+        const usernameField = document.getElementById('usernameField');
+        const emailInput = document.getElementById('loginEmail');
+        const usernameInput = document.getElementById('loginUsername');
+
+        console.log('Toggle fields for role:', role); // DEBUG
+
+        if (role === 'class_account') {
+          // Tampilkan username, sembunyikan email
+          emailField.style.display = 'none';
+          usernameField.style.display = 'block';
+          emailInput.required = false;
+          usernameInput.required = true;
+        } else {
+          // Tampilkan email, sembunyikan username
+          emailField.style.display = 'block';
+          usernameField.style.display = 'none';
+          emailInput.required = true;
+          usernameInput.required = false;
+        }
+      }
+
+      // Attach event listener ke select role
+      document.addEventListener('DOMContentLoaded', function () {
+        const roleSelect = document.getElementById('loginRole');
+
+        // Jalankan saat pertama kali load
+        toggleLoginFields();
+
+        // Jalankan setiap kali role berubah
+        roleSelect.addEventListener('change', toggleLoginFields);
+      });
+
+      const loginForm = document.getElementById('loginForm');
+
+      loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const role = document.getElementById('loginRole').value;
+        const password = document.getElementById('loginPassword').value;
+
+        try {
+          const payload = { role, password };
+
+          // Ambil username atau email sesuai role
+          if (role === 'class_account') {
+            const usernameInput = document.getElementById('loginUsername');
+            payload.username = usernameInput.value.trim();
+            console.log('Login as class account:', payload.username);
+          } else {
+            const emailInput = document.getElementById('loginEmail');
+            payload.email = emailInput.value.trim();
+            console.log('Login as', role, ':', payload.email);
+          }
+
+          const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+
+          const data = await res.json();
+
+          if (res.ok) {
+            const userData = { ...data.user, role };
+            localStorage.setItem('user', JSON.stringify(userData));
+            alert(data.message);
+
+            // Redirect sesuai role
+            if (role === 'siswa') {
+              window.location.href = '/student.html';
+            } else if (role === 'guru' || role === 'class_account') {
+              window.location.href = '/teacher.html';
+            } else if (role === 'admin') {
+              window.location.href = '/admin.html';
+            }
+          } else {
+            alert('❌ ' + data.error);
+          }
+        } catch (error) {
+          console.error('Login error:', error);
+          alert('❌ Terjadi kesalahan: ' + error.message);
+        }
+      });
+    </script>
+  </body>
+</html>

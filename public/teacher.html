@@ -1,0 +1,4294 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <title>Portal Guru - SHK</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f5f7fa;
+        display: flex;
+        min-height: 100vh;
+      }
+
+      /* Sidebar */
+      .sidebar {
+        width: 280px;
+        background: linear-gradient(180deg, #0d2bff, #0d2b52);
+        color: white;
+        position: fixed;
+        height: 100vh;
+        overflow-y: auto;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+      }
+
+      .sidebar-menu {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px 0;
+      }
+
+      .user-info {
+        margin-top: auto; /* Ini yang penting - push ke bawah */
+        padding: 25px 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(0, 0, 0, 0.2);
+      }
+
+      .logo {
+        padding: 30px 20px;
+        text-align: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .logo h1 {
+        font-size: 3rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: rgba(255, 255, 255, 0.9);
+      }
+
+      .logo p {
+        font-size: 1rem;
+        opacity: 0.8;
+      }
+
+      .menu-item {
+        padding: 15px 25px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+        display: flex;
+        align-items: center;
+        font-weight: 500;
+        margin: 5px 0;
+      }
+
+      .menu-item:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-left-color: #fff;
+      }
+
+      .menu-item.active {
+        background: rgba(255, 255, 255, 0.2);
+        border-left-color: #fff;
+      }
+
+      .menu-item i {
+        margin-right: 12px;
+        font-size: 1.2rem;
+        width: 20px;
+        text-align: center;
+      }
+
+      .user-avatar {
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 15px;
+        font-size: 1.2rem;
+      }
+
+      .user-details {
+        margin-bottom: 20px;
+      }
+
+      .user-details div {
+        margin-bottom: 5px;
+        font-size: 0.9rem;
+      }
+
+      .logout-btn {
+        background: #ef4444;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: background 0.3s;
+        width: 100%;
+        font-weight: 500;
+      }
+
+      .logout-btn:hover {
+        background: #dc2626;
+      }
+
+      /* Main Content */
+      .main-content {
+        margin-left: 280px;
+        flex: 1;
+        padding: 30px;
+        overflow-y: auto;
+      }
+
+      .content-header {
+        background: white;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 25px;
+      }
+
+      .content-body {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+        margin-bottom: 25px;
+      }
+
+      .section-title {
+        font-size: 1.5rem;
+        color: #1f2937;
+        margin-bottom: 25px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #0d2bff;
+      }
+
+      /* Tables */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+
+      table th {
+        background: #0d2bff;
+        color: white;
+        padding: 14px;
+        text-align: left;
+        font-weight: 600;
+      }
+
+      table td {
+        padding: 14px;
+        border-bottom: 1px solid #e2e8f0;
+      }
+
+      table tr:nth-child(even) {
+        background: #f8fafc;
+      }
+
+      table tr:hover {
+        background: #f1f5f9;
+      }
+
+      /* Forms */
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #374151;
+      }
+
+      .form-group input,
+      .form-group select,
+      .form-group textarea {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+      }
+
+      .form-group input:focus,
+      .form-group select:focus,
+      .form-group textarea:focus {
+        outline: none;
+        border-color: #0d2bff;
+      }
+
+      .form-group textarea {
+        min-height: 120px;
+        resize: vertical;
+      }
+
+      /* Buttons */
+      .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+      }
+
+      .btn-primary {
+        background: #0d2bff;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: #0b24cc;
+        transform: translateY(-2px);
+      }
+
+      .btn-success {
+        background: #10b981;
+        color: white;
+      }
+
+      .btn-success:hover {
+        background: #059669;
+        transform: translateY(-2px);
+      }
+
+      .btn-danger {
+        background: #ef4444;
+        color: white;
+      }
+
+      .btn-danger:hover {
+        background: #dc2626;
+        transform: translateY(-2px);
+      }
+
+      .btn-secondary {
+        background: #6b7280;
+        color: white;
+      }
+
+      .btn-secondary:hover {
+        background: #4b5563;
+      }
+
+      /* Action Buttons */
+      .action-buttons {
+        display: flex;
+        gap: 8px;
+      }
+
+      .btn-sm {
+        padding: 8px 16px;
+        font-size: 0.875rem;
+      }
+
+      /* Grid Layouts */
+      .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+      }
+
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 25px;
+      }
+
+      .grid-4 {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+      }
+
+      /* Cards */
+      .card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 25px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transition:
+          transform 0.3s ease,
+          box-shadow 0.3s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      }
+
+      .stat-card {
+        text-align: center;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+      }
+
+      .stat-number {
+        font-size: 2.8rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+
+      .stat-label {
+        font-size: 1rem;
+        opacity: 0.9;
+      }
+
+      /* Pagination */
+      .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin: 30px 0;
+      }
+
+      .pagination button {
+        padding: 10px 18px;
+        border: 2px solid #d1d5db;
+        background: white;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+
+      .pagination button.active {
+        background: #0d2bff;
+        color: white;
+        border-color: #0d2bff;
+      }
+
+      .pagination button:hover:not(.active) {
+        background: #f1f5f9;
+        border-color: #0d2bff;
+      }
+
+      /* Charts */
+      .chart-container {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      }
+
+      .chart-placeholder {
+        height: 300px;
+        background: linear-gradient(45deg, #f3f4f6, #e5e7eb);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6b7280;
+        font-size: 1.1rem;
+        text-align: center;
+        padding: 20px;
+      }
+
+      /* Modal */
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+      }
+
+      .modal-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 35px;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 600px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e2e8f0;
+      }
+
+      .modal-header h3 {
+        color: #1f2937;
+        font-size: 1.4rem;
+        margin: 0;
+      }
+
+      .close-modal {
+        background: none;
+        border: none;
+        font-size: 1.8rem;
+        cursor: pointer;
+        color: #6b7280;
+        transition: color 0.3s ease;
+      }
+
+      .close-modal:hover {
+        color: #374151;
+      }
+
+      /* File Upload */
+      .file-upload {
+        border: 2px dashed #d1d5db;
+        border-radius: 8px;
+        padding: 50px 30px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: #f8fafc;
+      }
+
+      .file-upload:hover {
+        border-color: #0d2bff;
+        background: #f0f9ff;
+      }
+
+      .file-upload input {
+        display: none;
+      }
+
+      .file-upload p {
+        color: #6b7280;
+        font-size: 1.1rem;
+        margin: 0;
+      }
+
+      /* Responsive */
+      @media (max-width: 1024px) {
+        .sidebar {
+          width: 250px;
+        }
+        .main-content {
+          margin-left: 250px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .sidebar {
+          width: 220px;
+        }
+        .main-content {
+          margin-left: 220px;
+          padding: 20px;
+        }
+
+        .grid-2,
+        .grid-3,
+        .grid-4 {
+          grid-template-columns: 1fr;
+          gap: 20px;
+        }
+
+        .action-buttons {
+          flex-direction: column;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .sidebar {
+          transform: translateX(-100%);
+          transition: transform 0.3s ease;
+          display: block;
+        }
+        .sidebar.open {
+          transform: translateX(0);
+        }
+        .main-content {
+          margin-left: 0;
+        }
+        .mobile-toggle {
+          display: block;
+        }
+      }
+
+      .mobile-toggle {
+        display: none;
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1001;
+        background: #0d2bff;
+        color: white;
+        border: none;
+        padding: 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1.2rem;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 60px;
+        color: #64748b;
+        font-size: 1.1rem;
+      }
+
+      .error {
+        background: #fef2f2;
+        color: #dc2626;
+        padding: 20px;
+        border-radius: 8px;
+        border: 1px solid #fecaca;
+        margin: 20px 0;
+        text-align: center;
+      }
+
+      .welcome-message {
+        font-size: 1.1rem;
+        color: #64748b;
+        margin-bottom: 10px;
+      }
+
+      .page-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+        flex-wrap: wrap;
+        gap: 15px;
+      }
+
+      .filter-controls {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .flex-between {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+    </style>
+  </head>
+  <body>
+    <button class="mobile-toggle" onclick="toggleSidebar()">☰</button>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <aside class="sidebar" id="sidebar">
+      <div class="logo">
+        <h1>SHK</h1>
+      </div>
+
+      <nav class="sidebar-menu">
+        <div class="menu-item active" onclick="loadPage('dashboard', this)">
+          <span>📊</span>
+          <span>Dashboard</span>
+        </div>
+        <div class="menu-item" onclick="loadPage('students-info', this)">
+          <span>👥</span>
+          <span>Informasi Data Siswa</span>
+        </div>
+        <div class="menu-item" onclick="loadPage('news', this)">
+          <span>📰</span>
+          <span>Berita & Pengumuman</span>
+        </div>
+        <div class="menu-item" onclick="loadPage('gallery', this)">
+          <span>📸</span>
+          <span>Galeri Foto Kegiatan</span>
+        </div>
+        <div class="menu-item" onclick="loadPage('schedule', this)">
+          <span>📅</span>
+          <span>Jadwal & Kalender</span>
+        </div>
+        <div class="menu-item" onclick="loadPage('nilai', this)">
+          <span>📋</span>
+          <span>Manajemen Nilai</span>
+        </div>
+        <div class="menu-item" onclick="loadPage('rapor', this)">
+          <span>📝</span>
+          <span>Manajemen Rapor</span>
+        </div>
+        <div class="menu-item" onclick="loadPage('chat', this)">
+          <span>💬</span>
+          <span>Chat Siswa</span>
+        </div>
+      </nav>
+
+      <div class="user-info">
+        <div class="user-avatar">👨‍🏫</div>
+        <div class="user-details">
+          <div><strong id="userName">Guru</strong></div>
+          <div id="userEmail">guru@sekolah.sch.id</div>
+          <div id="userSpecialization">Guru Kelas</div>
+        </div>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div id="mainContent">
+        <!-- Content will be loaded here -->
+      </div>
+    </main>
+
+    <!-- Modal for CRUD operations -->
+    <div id="modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="modal-title">Modal Title</h3>
+          <button class="close-modal" onclick="closeModal()">&times;</button>
+        </div>
+        <div id="modal-body">
+          <!-- Modal content will be loaded here -->
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const api = '/api';
+
+      // Initialize user data
+      let user = JSON.parse(localStorage.getItem('user') || 'null');
+
+      if (!user || !user.id) {
+        alert('Silakan login terlebih dahulu');
+        window.location.href = '/index.html';
+        throw new Error('Not authenticated');
+      }
+
+      if (user.role !== 'guru' && user.role !== 'class_account') {
+        alert('Silakan login sebagai guru atau wali kelas');
+        window.location.href = '/index.html';
+        throw new Error('Unauthorized role');
+      }
+
+      console.log('User loaded:', user);
+
+      // Update user info in sidebar
+      if (user.role === 'class_account') {
+        // Untuk akun kelas
+        document.getElementById('userName').textContent = user.wali_kelas || 'Wali Kelas';
+        document.getElementById('userEmail').textContent = `Kelas ${user.kelas}`;
+        document.getElementById('userSpecialization').textContent = `Username: ${user.username}`;
+      } else {
+        // Untuk guru
+        document.getElementById('userName').textContent = user.nama || 'Guru';
+        document.getElementById('userEmail').textContent = user.email || 'guru@sekolah.sch.id';
+        document.getElementById('userSpecialization').textContent =
+          user.spesialisasi || 'Guru Kelas';
+      }
+
+      let currentPage = {
+        news: 1,
+        students: 1,
+        gallery: 1,
+      };
+      const itemsPerPage = 5;
+
+      window.onload = () => loadPage('dashboard');
+
+      function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('active');
+      }
+
+      function setActiveMenu(activeItem) {
+        document.querySelectorAll('.menu-item').forEach((item) => {
+          item.classList.remove('active');
+        });
+        if (activeItem) {
+          activeItem.classList.add('active');
+        }
+      }
+
+      async function loadPage(page, menuItem = null) {
+        // Set active menu
+        setActiveMenu(menuItem);
+
+        const mainContent = document.getElementById('mainContent');
+        mainContent.innerHTML = '<div class="loading">Loading...</div>';
+
+        try {
+          if (page === 'dashboard') {
+            loadDashboard(mainContent);
+          } else if (page === 'students-info') {
+            loadStudentsInfo(mainContent);
+          } else if (page === 'news') {
+            loadNewsManagement(mainContent);
+          } else if (page === 'gallery') {
+            loadGalleryManagement(mainContent);
+          } else if (page === 'schedule') {
+            loadScheduleManagement(mainContent);
+          } else if (page === 'nilai') {
+            loadNilaiManagement(mainContent);
+          } else if (page === 'rapor') {
+            loadRaporManagement(mainContent);
+          } else if (page === 'chat') {
+            loadChatManagement(mainContent);
+          } else {
+            mainContent.innerHTML = '<div class="error">Halaman tidak ditemukan.</div>';
+          }
+        } catch (err) {
+          console.error('Error loading page:', err);
+          mainContent.innerHTML = `<div class="error">Error: ${err.message}</div>`;
+        }
+      }
+
+      // Modal Functions
+      function showModal(title, content) {
+        document.getElementById('modal-title').textContent = title;
+        document.getElementById('modal-body').innerHTML = content;
+        document.getElementById('modal').style.display = 'block';
+      }
+
+      function closeModal() {
+        document.getElementById('modal').style.display = 'none';
+      }
+
+      async function loadDashboard(main) {
+        main.innerHTML = '<div class="loading">Loading...</div>';
+
+        try {
+          // Fetch analytics data
+          const response = await fetch(`${api}/analytics/dashboard`);
+          if (!response.ok) throw new Error('Failed to fetch analytics');
+
+          const analytics = await response.json();
+
+          // Fetch total guru
+          const guruResponse = await fetch(`${api}/teachers`);
+          const guruData = await guruResponse.json();
+          const totalGuru = guruData.length || 0;
+
+          const totalStudents = analytics.totalStudents || 0;
+          const maleStudents = analytics.genderDistribution?.L || 0;
+          const femaleStudents = analytics.genderDistribution?.P || 0;
+          const classDistribution = analytics.classDistribution || {};
+          const totalClasses = Object.keys(classDistribution).length;
+          const currentYear = new Date().getFullYear();
+
+          main.innerHTML = `
+  <div class="content-body">
+    <div class="flex-between" style="margin-bottom: 20px;">
+      <h2 class="section-title" style="margin: 0;">Dashboard Guru - Tahun Ajaran ${currentYear}/${currentYear + 1}</h2>
+      <button class="btn btn-secondary" onclick="exportDashboardPDF()">Export PDF</button>
+    </div>
+    <p>Selamat datang, <strong>${user.nama || 'Guru'}</strong>!</p>
+        
+        <div class="grid-4" style="margin: 30px 0;">
+          <div class="card stat-card">
+            <div class="stat-number">${totalStudents}</div>
+            <div class="stat-label">Total Siswa</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-number">${maleStudents}</div>
+            <div class="stat-label">Siswa Laki-laki</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-number">${femaleStudents}</div>
+            <div class="stat-label">Siswa Perempuan</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-number">${totalClasses}</div>
+            <div class="stat-label">Total Kelas</div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 30px 0;">
+          <div class="card stat-card">
+            <div class="stat-number">${totalGuru}</div>
+            <div class="stat-label">Total Guru</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-number">7</div>
+            <div class="stat-label">Ekstrakurikuler</div>
+          </div>
+        </div>
+
+        <div style="margin-top: 40px;">
+          <h3 style="margin-bottom: 20px;">Kegiatan Sekolah</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Kategori</th>
+                <th>Detail</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Kegiatan Regular</strong></td>
+                <td>Upacara Bendera (Senin), Olahraga Pagi (tergantung kelas), Literasi 15 Menit (Setiap Hari sebelum mulai pelajaran)</td>
+              </tr>
+              <tr>
+                <td><strong>Ekstrakurikuler Aktif</strong></td>
+                <td>Modern Dance, Panduan Suara, Taekwondo, Tenis Meja, Ansambel, Alat Musik Biola, Pramuka (Total: 7)</td>
+              </tr>
+              <tr>
+                <td><strong>Lomba yang Diikuti (Tahun ${currentYear})</strong></td>
+                <td>Bahasa Inggris, Kompetisi Baca Kitab Suci, Lomba Modern Dance, dan lainnya (Total: 7 Lomba)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="grid-2" style="margin-top: 40px;">
+          <div class="chart-container">
+            <h3>Distribusi Siswa per Kelas</h3>
+            <div id="class-distribution-chart" style="padding: 20px;"></div>
+          </div>
+          
+          <div class="chart-container">
+            <h3>Distribusi Jenis Kelamin</h3>
+            <div id="gender-distribution-chart" style="padding: 20px; text-align: center;"></div>
+          </div>
+        </div>
+      </div>
+    `;
+
+          const chatResponse = await fetch(`${api}/chatbot/pending`);
+          const pendingChats = await chatResponse.json();
+          const pendingCount = pendingChats.length;
+
+          // Update sidebar menu chat dengan badge
+          const chatMenuItem = document.querySelector('.menu-item[onclick*="chat"]');
+          if (chatMenuItem && pendingCount > 0) {
+            chatMenuItem.innerHTML = `
+      <span>💬</span>
+      <span>Chat Siswa</span>
+      <span style="background: #ef4444; color: white; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; margin-left: auto; font-size: 0.75rem; font-weight: bold;">
+        ${pendingCount}
+      </span>
+    `;
+          }
+
+          // Render charts
+          setTimeout(() => {
+            renderClassChart(classDistribution);
+            renderGenderChart({ L: maleStudents, P: femaleStudents }, totalStudents);
+          }, 100);
+        } catch (error) {
+          console.error('Dashboard error:', error);
+          main.innerHTML = `<div class="error">Gagal memuat dashboard: ${error.message}</div>`;
+        }
+      }
+
+      async function exportDashboardPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        const currentYear = new Date().getFullYear();
+
+        doc.setFontSize(18);
+        doc.text(`Dashboard Guru - TA ${currentYear}/${currentYear + 1}`, 14, 20);
+        doc.setFontSize(11);
+        doc.text(`Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')}`, 14, 28);
+
+        try {
+          const response = await fetch(`${api}/analytics/dashboard`);
+          const analytics = await response.json();
+          const guruResponse = await fetch(`${api}/teachers`);
+          const guruData = await guruResponse.json();
+
+          const statsData = [
+            ['Total Siswa', analytics.totalStudents || 0],
+            ['Siswa Laki-laki', analytics.genderDistribution?.L || 0],
+            ['Siswa Perempuan', analytics.genderDistribution?.P || 0],
+            ['Total Kelas', Object.keys(analytics.classDistribution || {}).length],
+            ['Total Guru', guruData.length],
+            ['Ekstrakurikuler', 7],
+          ];
+
+          doc.autoTable({
+            startY: 35,
+            head: [['Kategori', 'Jumlah']],
+            body: statsData,
+            styles: { fontSize: 10 },
+            headStyles: { fillColor: [13, 43, 255] },
+          });
+
+          // Distribusi Kelas
+          const classData = Object.entries(analytics.classDistribution || {}).map(
+            ([kelas, jumlah]) => [kelas, jumlah]
+          );
+
+          doc.text('Distribusi Siswa per Kelas', 14, doc.lastAutoTable.finalY + 15);
+          doc.autoTable({
+            startY: doc.lastAutoTable.finalY + 20,
+            head: [['Kelas', 'Jumlah Siswa']],
+            body: classData,
+            styles: { fontSize: 9 },
+            headStyles: { fillColor: [13, 43, 255] },
+          });
+
+          doc.save(`Dashboard-${new Date().toISOString().split('T')[0]}.pdf`);
+        } catch (error) {
+          alert('Gagal export PDF: ' + error.message);
+        }
+      }
+
+      // Function untuk render chart distribusi kelas
+      function renderClassChart(classData) {
+        const chartElement = document.getElementById('class-distribution-chart');
+        if (!chartElement) return;
+
+        if (Object.keys(classData).length === 0) {
+          chartElement.innerHTML =
+            '<p style="text-align: center; color: #64748b;">Belum ada data siswa</p>';
+          return;
+        }
+
+        const maxValue = Math.max(...Object.values(classData));
+        let chartHTML = '';
+
+        for (const [kelas, jumlah] of Object.entries(classData)) {
+          const barWidth = maxValue > 0 ? (jumlah / maxValue) * 100 : 0;
+          chartHTML += `
+      <div style="margin-bottom: 15px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+          <strong>${kelas}</strong>
+          <span>${jumlah} siswa</span>
+        </div>
+        <div style="background: #e5e7eb; height: 30px; border-radius: 5px; overflow: hidden;">
+          <div style="background: linear-gradient(135deg, #667eea, #764ba2); width: ${barWidth}%; height: 100%; transition: width 0.3s;"></div>
+        </div>
+      </div>
+    `;
+        }
+
+        chartElement.innerHTML = chartHTML;
+      }
+
+      // Function untuk render chart jenis kelamin
+      function renderGenderChart(genderData, total) {
+        const chartElement = document.getElementById('gender-distribution-chart');
+        if (!chartElement) return;
+
+        if (total === 0) {
+          chartElement.innerHTML = '<p style="color: #64748b;">Belum ada data siswa</p>';
+          return;
+        }
+
+        const malePercent = total > 0 ? Math.round((genderData.L / total) * 100) : 0;
+        const femalePercent = total > 0 ? Math.round((genderData.P / total) * 100) : 0;
+
+        chartElement.innerHTML = `
+    <div style="padding: 20px;">
+      <div style="display: flex; justify-content: center; gap: 40px; margin: 30px 0;">
+        <div style="width: 150px; height: 150px; border-radius: 50%; background: conic-gradient(#3b82f6 0% ${malePercent}%, #ec4899 ${malePercent}% 100%); margin: 0 auto;"></div>
+      </div>
+      <div style="display: flex; justify-content: center; gap: 30px; margin-top: 20px;">
+        <div>
+          <div style="width: 20px; height: 20px; background: #3b82f6; display: inline-block; border-radius: 3px;"></div>
+          <strong> Laki-laki: ${genderData.L || 0} (${malePercent}%)</strong>
+        </div>
+        <div>
+          <div style="width: 20px; height: 20px; background: #ec4899; display: inline-block; border-radius: 3px;"></div>
+          <strong> Perempuan: ${genderData.P || 0} (${femalePercent}%)</strong>
+        </div>
+      </div>
+    </div>
+  `;
+      }
+
+      function calculateAverage(pelajaranId, col1Key, col2Key, semester, tugasSem1) {
+        const input1 = document.getElementById(`${col1Key}-${pelajaranId}`);
+        const input2 = document.getElementById(`${col2Key}-${pelajaranId}`);
+        const rataSpan = document.getElementById(`rata-${pelajaranId}`);
+
+        if (!input1 || !input2 || !rataSpan) return;
+
+        if (semester == 2) {
+          // Semester 2: total tugas = tugas semester 1 + semester 2
+          const tugasSem1Score = parseFloat(tugasSem1) || 0;
+          const tugasSem2Score = parseFloat(input1.value) || 0; // kolom pertama semester 2 = tugas S2
+
+          // ambil input UTS & UAS
+          const utsScore = parseFloat(document.getElementById(`uts-${pelajaranId}`)?.value) || 0;
+          const uasScore = parseFloat(document.getElementById(`uas-${pelajaranId}`)?.value) || 0;
+
+          const totalTugas = tugasSem1Score + tugasSem2Score;
+
+          if (totalTugas > 0 || utsScore > 0 || uasScore > 0) {
+            const avg = ((totalTugas + utsScore + uasScore) / 3).toFixed(2);
+            rataSpan.textContent = avg;
+
+            // Biru jika nilai sudah terisi lengkap, orange jika masih kurang
+            if (tugasSem2Score > 0 && utsScore > 0 && uasScore > 0) {
+              rataSpan.style.color = '#0d2bff'; // lengkap
+            } else {
+              rataSpan.style.color = '#ff8c00'; // belum lengkap
+            }
+          } else {
+            rataSpan.textContent = '-';
+            rataSpan.style.color = '#999';
+          }
+        } else {
+          // Semester 1 = (Tugas + UH) / 2
+          const val1 = parseFloat(input1.value) || 0;
+          const val2 = parseFloat(input2.value) || 0;
+
+          if (val1 > 0 && val2 > 0) {
+            const avg = ((val1 + val2) / 2).toFixed(2);
+            rataSpan.textContent = avg;
+            rataSpan.style.color = '#0d2bff';
+          } else {
+            rataSpan.textContent = '-';
+            rataSpan.style.color = '#999';
+          }
+        }
+      }
+
+      async function loadStudentsInfo(main) {
+        main.innerHTML = '<div class="loading">Loading...</div>';
+
+        try {
+          const response = await fetch(`${api}/students`);
+          if (!response.ok) throw new Error('Failed to fetch students');
+
+          const students = await response.json();
+
+          main.innerHTML = `
+      <div class="content-body">
+        <div class="flex-between" style="margin-bottom: 20px;">
+          <h2 class="section-title" style="margin: 0;">Informasi Data Siswa</h2>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn btn-secondary" onclick="exportStudentsPDF()">Export PDF</button>
+            <button class="btn btn-success" onclick="showAddStudent()">Tambah Siswa</button>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 20px; display: flex; gap: 10px;">
+          <input type="text" id="search-student" placeholder="Cari nama/NIS..." 
+                 style="flex: 1; padding: 10px; border: 2px solid #d1d5db; border-radius: 8px;"
+                 oninput="filterStudents()">
+          <select id="filter-class" style="padding: 10px; border: 2px solid #d1d5db; border-radius: 8px;" onchange="filterStudents()">
+            <option value="">Semua Kelas</option>
+            <option value="1A">1A</option>
+            <option value="1B">1B</option>
+            <option value="1C">1C</option>
+            <option value="2A">2A</option>
+            <option value="2B">2B</option>
+            <option value="2C">2C</option>
+            <option value="3A">3A</option>
+            <option value="3B">3B</option>
+            <option value="3C">3C</option>
+            <option value="4A">4A</option>
+            <option value="4B">4B</option>
+            <option value="4C">4C</option>
+            <option value="5A">5A</option>
+            <option value="5B">5B</option>
+            <option value="5C">5C</option>
+            <option value="6A">6A</option>
+            <option value="6B">6B</option>
+            <option value="6C">6C</option>
+          </select>
+          <select id="filter-gender" style="padding: 10px; border: 2px solid #d1d5db; border-radius: 8px;" onchange="filterStudents()">
+            <option value="">Semua Jenis Kelamin</option>
+            <option value="L">Laki-laki</option>
+            <option value="P">Perempuan</option>
+          </select>
+        </div>
+
+        <table id="students-table">
+          <thead>
+            <tr>
+              <th>NIS</th>
+              <th>Nama</th>
+              <th>Kelas</th>
+              <th>Jenis Kelamin</th>
+              <th>Email</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="students-tbody">
+            <tbody id="students-tbody">
+  ${students
+    .map(
+      (student) => `
+              <tr data-nis="${student.nis}" data-nama="${student.nama.toLowerCase()}" 
+                  data-kelas="${student.kelas}" data-gender="${student.jenis_kelamin}">
+                <td>${student.nis}</td>
+                <td>${student.nama}</td>
+                <td>${student.kelas || '-'}</td>
+                <td>${student.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan'}</td>
+                <td>${student.email}</td>
+                <td class="action-buttons">
+                  <button class="btn btn-primary btn-sm" onclick="editStudent(${student.id})">Edit</button>
+                  <button class="btn btn-danger btn-sm" onclick="deleteStudent(${student.id})">Hapus</button>
+                </td>
+              </tr>
+            `
+    )
+    .join('')}
+          </tbody>
+        </table>
+
+        
+      </div>
+    `;
+
+          window.allStudentsData = students;
+        } catch (error) {
+          console.error('Load students error:', error);
+          main.innerHTML = `<div class="error">Gagal memuat data siswa: ${error.message}</div>`;
+        }
+      }
+
+      function filterStudents() {
+        const searchTerm = document.getElementById('search-student').value.toLowerCase().trim();
+        const filterClass = document.getElementById('filter-class').value.trim();
+        const filterGender = document.getElementById('filter-gender').value.trim();
+
+        const rows = document.querySelectorAll('#students-tbody tr');
+
+        let visibleCount = 0;
+        rows.forEach((row) => {
+          const nis = (row.dataset.nis || '').toLowerCase();
+          const nama = (row.dataset.nama || '').toLowerCase();
+          const kelas = (row.dataset.kelas || '').trim();
+          const gender = (row.dataset.gender || '').trim();
+
+          const matchSearch = !searchTerm || nis.includes(searchTerm) || nama.includes(searchTerm);
+          const matchClass = !filterClass || kelas === filterClass;
+          const matchGender = !filterGender || gender === filterGender;
+
+          if (matchSearch && matchClass && matchGender) {
+            row.style.display = '';
+            visibleCount++;
+          } else {
+            row.style.display = 'none';
+          }
+        });
+
+        console.log(`Menampilkan ${visibleCount} dari ${rows.length} siswa`);
+      }
+
+      async function exportStudentsPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        doc.setFontSize(18);
+        doc.text('Laporan Data Siswa', 14, 20);
+        doc.setFontSize(11);
+        doc.text(`Tanggal: ${new Date().toLocaleDateString('id-ID')}`, 14, 28);
+
+        const visibleRows = Array.from(document.querySelectorAll('#students-tbody tr')).filter(
+          (row) => row.style.display !== 'none'
+        );
+
+        const tableData = visibleRows.map((row) => {
+          const cells = row.querySelectorAll('td');
+          return [
+            cells[0].textContent,
+            cells[1].textContent,
+            cells[2].textContent,
+            cells[3].textContent,
+            cells[4].textContent,
+          ];
+        });
+
+        doc.autoTable({
+          startY: 35,
+          head: [['NIS', 'Nama', 'Kelas', 'Jenis Kelamin', 'Email']],
+          body: tableData,
+          styles: { fontSize: 9 },
+          headStyles: { fillColor: [13, 43, 255] },
+        });
+
+        doc.save(`Laporan-Siswa-${new Date().toISOString().split('T')[0]}.pdf`);
+      }
+
+      function showAddStudent() {
+        const content = `
+    <form onsubmit="saveStudent(event)">
+      <div class="form-group">
+        <label>NIS</label>
+        <input type="text" id="nisn" required>
+      </div>
+      <div class="form-group">
+        <label>Nama</label>
+        <input type="text" id="nama" required 
+         pattern="[a-zA-Z\s]+" 
+         title="Nama hanya boleh berisi huruf"
+         oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '')"
+         placeholder="Masukkan nama (hanya huruf)">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="email">
+      </div>
+      <div class="form-group">
+        <label>Kelas</label>
+        <select id="kelas" required>
+          <option value="">Pilih Kelas</option>
+          <option value="1A">1A</option>
+          <option value="1B">1B</option>
+          <option value="1C">1C</option>
+          <option value="2A">2A</option>
+          <option value="2B">2B</option>
+          <option value="2C">2C</option>
+          <option value="3A">3A</option>
+          <option value="3B">3B</option>
+          <option value="3C">3C</option>
+          <option value="4A">4A</option>
+          <option value="4B">4B</option>
+          <option value="4C">4C</option>
+          <option value="5A">5A</option>
+          <option value="5B">5B</option>
+          <option value="5C">5C</option>
+          <option value="6A">6A</option>
+          <option value="6B">6B</option>
+          <option value="6C">6C</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Jenis Kelamin</label>
+        <select id="jenis_kelamin" required>
+          <option value="">Pilih Jenis Kelamin</option>
+          <option value="L">Laki-laki</option>
+          <option value="P">Perempuan</option>
+        </select>
+      </div>
+      <div style="margin-top: 20px;">
+        <button type="submit" class="btn btn-success">Simpan</button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">Batal</button>
+      </div>
+    </form>
+  `;
+        showModal('Tambah Siswa', content);
+      }
+
+      async function saveStudent(event) {
+        event.preventDefault();
+
+        const nis = document.getElementById('nisn').value;
+        const nama = document.getElementById('nama').value;
+        const email = document.getElementById('email').value;
+        const kelas = document.getElementById('kelas').value; // Ini sudah nama kelas (1A, 2B, dst)
+        const jenis_kelamin = document.getElementById('jenis_kelamin').value;
+
+        try {
+          const response = await fetch(`${api}/students`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              nis,
+              nama,
+              email,
+              kelas, // Kirim nama kelas, bukan ID
+              jenis_kelamin,
+            }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            alert('Data siswa berhasil disimpan!');
+            closeModal();
+            loadPage('students-info');
+          } else {
+            alert(data.error || 'Gagal menyimpan');
+          }
+        } catch (error) {
+          console.error('Save student error:', error);
+          alert('Terjadi kesalahan: ' + error.message);
+        }
+      }
+
+      async function editStudent(id) {
+        try {
+          const response = await fetch(`${api}/students/${id}`);
+          if (!response.ok) throw new Error('Siswa tidak ditemukan');
+
+          const student = await response.json();
+
+          const content = `
+      <form onsubmit="updateStudent(event, ${id})">
+        <div class="form-group">
+          <label>NIS</label>
+          <input type="text" id="edit-nis" value="${student.nis}" readonly style="background: #f3f4f6;">
+        </div>
+        <div class="form-group">
+          <label>Nama</label>
+          <input type="text" id="edit-nama" value="${student.nama}" required
+         pattern="[a-zA-Z\s]+"
+         title="Nama hanya boleh berisi huruf"
+         oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '')"
+         placeholder="Masukkan nama (hanya huruf)">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="edit-email" value="${student.email || ''}">
+        </div>
+        <div class="form-group">
+          <label>Kelas</label>
+          <select id="edit-kelas" required>
+            <option value="">Pilih Kelas</option>
+            <option value="1A" ${student.kelas === '1A' ? 'selected' : ''}>1A</option>
+            <option value="1B" ${student.kelas === '1B' ? 'selected' : ''}>1B</option>
+            <option value="1C" ${student.kelas === '1C' ? 'selected' : ''}>1C</option>
+            <option value="2A" ${student.kelas === '2A' ? 'selected' : ''}>2A</option>
+            <option value="2B" ${student.kelas === '2B' ? 'selected' : ''}>2B</option>
+            <option value="2C" ${student.kelas === '2C' ? 'selected' : ''}>2C</option>
+            <option value="3A" ${student.kelas === '3A' ? 'selected' : ''}>3A</option>
+            <option value="3B" ${student.kelas === '3B' ? 'selected' : ''}>3B</option>
+            <option value="3C" ${student.kelas === '3C' ? 'selected' : ''}>3C</option>
+            <option value="4A" ${student.kelas === '4A' ? 'selected' : ''}>4A</option>
+            <option value="4B" ${student.kelas === '4B' ? 'selected' : ''}>4B</option>
+            <option value="4C" ${student.kelas === '4C' ? 'selected' : ''}>4C</option>
+            <option value="5A" ${student.kelas === '5A' ? 'selected' : ''}>5A</option>
+            <option value="5B" ${student.kelas === '5B' ? 'selected' : ''}>5B</option>
+            <option value="5C" ${student.kelas === '5C' ? 'selected' : ''}>5C</option>
+            <option value="6A" ${student.kelas === '6A' ? 'selected' : ''}>6A</option>
+            <option value="6B" ${student.kelas === '6B' ? 'selected' : ''}>6B</option>
+            <option value="6C" ${student.kelas === '6C' ? 'selected' : ''}>6C</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Jenis Kelamin</label>
+          <select id="edit-jenis_kelamin" required>
+            <option value="L" ${student.jenis_kelamin === 'L' ? 'selected' : ''}>Laki-laki</option>
+            <option value="P" ${student.jenis_kelamin === 'P' ? 'selected' : ''}>Perempuan</option>
+          </select>
+        </div>
+        <div style="margin-top: 20px;">
+          <button type="submit" class="btn btn-success">Update</button>
+          <button type="button" class="btn btn-secondary" onclick="closeModal()">Batal</button>
+        </div>
+      </form>
+    `;
+          showModal('Edit Siswa', content);
+        } catch (error) {
+          console.error('Edit student error:', error);
+          alert('Gagal memuat data siswa: ' + error.message);
+        }
+      }
+
+      async function updateStudent(event, id) {
+        event.preventDefault();
+
+        const nama = document.getElementById('edit-nama').value;
+        const email = document.getElementById('edit-email').value;
+        const kelas = document.getElementById('edit-kelas').value; // Nama kelas
+        const jenis_kelamin = document.getElementById('edit-jenis_kelamin').value;
+
+        try {
+          const response = await fetch(`${api}/students/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              nama,
+              email,
+              kelas, // Kirim nama kelas
+              jenis_kelamin,
+            }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            alert('Data siswa berhasil diupdate!');
+            closeModal();
+            loadPage('students-info');
+          } else {
+            alert(data.error || 'Gagal mengupdate');
+          }
+        } catch (error) {
+          console.error('Update student error:', error);
+          alert('Terjadi kesalahan: ' + error.message);
+        }
+      }
+
+      async function deleteStudent(id) {
+        if (!confirm('Apakah Anda yakin ingin menghapus data siswa ini?')) return;
+
+        try {
+          const response = await fetch(`${api}/students/${id}`, {
+            method: 'DELETE',
+          });
+
+          if (response.ok) {
+            alert('Data siswa berhasil dihapus!');
+            loadPage('students-info');
+          } else {
+            const data = await response.json();
+            alert(data.error || 'Gagal menghapus');
+          }
+        } catch (error) {
+          console.error('Delete student error:', error);
+          alert('Terjadi kesalahan: ' + error.message);
+        }
+      }
+
+      async function loadNewsManagement(main) {
+        main.innerHTML = '<div class="loading">Loading...</div>';
+
+        try {
+          const response = await fetch(`${api}/news`);
+          if (!response.ok) throw new Error('Failed to fetch news');
+
+          const allNews = await response.json();
+
+          // Simpan di global untuk filter dan export
+          window.allNewsDataForExport = allNews;
+
+          currentPage.news = currentPage.news || 1;
+
+          // Render tabel dengan semua data (akan difilter oleh filterNews jika ada)
+          renderNewsTable(allNews, currentPage.news);
+
+          // Update HTML struktur
+          main.innerHTML = `
+      <div class="content-body">
+        <div class="flex-between" style="margin-bottom: 20px;">
+          <h2 class="section-title" style="margin: 0;">Manajemen Berita & Pengumuman</h2>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn btn-secondary" onclick="exportNewsPDF()">Export PDF</button>
+            <button class="btn btn-success" onclick="showAddNews()">Tambah Baru</button>
+          </div>
+        </div>
+
+        <!-- Filter Search -->
+        <div style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center;">
+          <input type="text" id="search-news" placeholder="Cari berita/pengumuman..." 
+                 style="flex: 1; padding: 10px; border: 2px solid #d1d5db; border-radius: 8px;"
+                 oninput="filterNews()">
+          <select id="filter-type" style="padding: 10px; border: 2px solid #d1d5db; border-radius: 8px;" onchange="filterNews()">
+            <option value="">Semua Jenis</option>
+            <option value="berita">Berita</option>
+            <option value="pengumuman">Pengumuman</option>
+          </select>
+          <input type="date" id="filter-date" style="padding: 10px; border: 2px solid #d1d5db; border-radius: 8px;" onchange="filterNews()">
+        </div>
+
+        <table id="news-table">
+          <thead>
+            <tr>
+              <th>Judul</th>
+              <th>Jenis</th>
+              <th>Tanggal</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="news-tbody">
+            <!-- Data akan dirender oleh JavaScript -->
+          </tbody>
+        </table>
+
+        <div class="pagination">
+          <!-- Pagination akan dirender oleh JavaScript -->
+        </div>
+      </div>
+    `;
+
+          // Panggil filterNews untuk merender data awal
+          setTimeout(() => {
+            renderNewsTable(allNews, currentPage.news);
+          }, 100);
+        } catch (error) {
+          console.error('Load news error:', error);
+          main.innerHTML = `<div class="error">Gagal memuat data: ${error.message}</div>`;
+        }
+      }
+
+      function filterNews() {
+        const searchTerm = document.getElementById('search-news').value.toLowerCase();
+        const filterType = document.getElementById('filter-type').value;
+        const filterDate = document.getElementById('filter-date').value;
+
+        // Filter dari SEMUA data
+        const filteredData = window.allNewsDataForExport.filter((item) => {
+          const matchSearch = !searchTerm || item.judul.toLowerCase().includes(searchTerm);
+          const matchType = !filterType || item.type === filterType;
+          const matchDate = !filterDate || item.tanggal === filterDate;
+
+          return matchSearch && matchType && matchDate;
+        });
+
+        // Render ulang tabel dengan data yang sudah difilter
+        renderNewsTable(filteredData, currentPage.news);
+      }
+
+      function renderNewsTable(data, page) {
+        const tbody = document.getElementById('news-tbody');
+        if (!tbody) return;
+
+        // Hitung pagination
+        const startIndex = (page - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const pageData = data.slice(startIndex, endIndex);
+
+        // Kosongkan dan render ulang
+        tbody.innerHTML = '';
+
+        pageData.forEach((item) => {
+          const row = document.createElement('tr');
+          row.setAttribute('data-title', item.judul.toLowerCase());
+          row.setAttribute('data-type', item.type);
+          row.setAttribute('data-date', item.tanggal);
+
+          row.innerHTML = `
+            <td>${item.judul}</td>
+            <td>${item.type === 'berita' ? 'Berita' : 'Pengumuman'}</td>
+            <td>${item.tanggal}</td>
+            <td class="action-buttons">
+                <button class="btn btn-primary btn-sm" onclick="editNews(${item.id}, '${item.type}')">Edit</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteNews(${item.id}, '${item.type}')">Hapus</button>
+            </td>
+        `;
+
+          tbody.appendChild(row);
+        });
+
+        // Update pagination
+        updateNewsPagination(data.length);
+      }
+
+      function updateNewsPagination(totalItems) {
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+        const paginationDiv = document.querySelector('.pagination');
+        if (!paginationDiv) return;
+
+        let html = '';
+        for (let i = 1; i <= totalPages; i++) {
+          html += `<button class="${i === currentPage.news ? 'active' : ''}" onclick="changePage('news', ${i})">${i}</button>`;
+        }
+
+        paginationDiv.innerHTML = html;
+      }
+
+      async function exportNewsPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        // Header
+        doc.setFontSize(18);
+        doc.text('Laporan Berita & Pengumuman', 14, 20);
+        doc.setFontSize(11);
+        doc.text(`Tanggal: ${new Date().toLocaleDateString('id-ID')}`, 14, 28);
+
+        // Ambil nilai filter dari UI
+        const searchTerm = document.getElementById('search-news')?.value.toLowerCase() || '';
+        const filterType = document.getElementById('filter-type')?.value || '';
+        const filterDate = document.getElementById('filter-date')?.value || '';
+
+        // Gunakan semua data dari array global (bukan dari DOM)
+        const allData = window.allNewsDataForExport || [];
+
+        // Terapkan filter yang sama seperti di UI
+        const filteredData = allData.filter((item) => {
+          const matchSearch = !searchTerm || item.judul.toLowerCase().includes(searchTerm);
+          const matchType = !filterType || item.type === filterType;
+          const matchDate = !filterDate || item.tanggal === filterDate;
+
+          return matchSearch && matchType && matchDate;
+        });
+
+        // Konversi ke format tabel
+        const tableData = filteredData.map((item) => [
+          item.judul,
+          item.type === 'berita' ? 'Berita' : 'Pengumuman',
+          item.tanggal,
+        ]);
+
+        if (tableData.length === 0) {
+          doc.text('Tidak ada data untuk ditampilkan', 14, 35);
+        } else {
+          // Tambahkan info jumlah data
+          doc.text(`Total Data: ${tableData.length} item`, 14, 35);
+
+          doc.autoTable({
+            startY: 40,
+            head: [['Judul', 'Jenis', 'Tanggal']],
+            body: tableData,
+            styles: {
+              fontSize: 9,
+              cellPadding: 3,
+            },
+            headStyles: {
+              fillColor: [13, 43, 255],
+              textColor: [255, 255, 255],
+            },
+            alternateRowStyles: {
+              fillColor: [240, 240, 240],
+            },
+            margin: { top: 45 },
+          });
+        }
+
+        doc.save(`Laporan-Berita-${new Date().toISOString().split('T')[0]}.pdf`);
+      }
+
+      function showAddNews() {
+        const content = `
+    <form onsubmit="handleNewsType(event)">
+      <div class="form-group">
+        <label>Jenis</label>
+        <select id="news-type" required>
+          <option value="">-- Pilih Jenis --</option>
+          <option value="berita">Berita</option>
+          <option value="pengumuman">Pengumuman</option>
+        </select>
+      </div>
+      <div style="margin-top: 20px;">
+        <button type="submit" class="btn btn-success">Lanjutkan</button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">Batal</button>
+      </div>
+    </form>
+  `;
+        showModal('Tambah Berita/Pengumuman - Pilih Jenis', content);
+      }
+
+      function handleNewsType(event) {
+        event.preventDefault();
+        const type = document.getElementById('news-type').value;
+
+        if (type === 'berita') {
+          showFormBerita();
+        } else if (type === 'pengumuman') {
+          showFormPengumuman();
+        }
+      }
+      async function saveBeritaStep1(event) {
+        event.preventDefault();
+
+        const judul = document.getElementById('berita-title').value;
+        const konten = document.getElementById('berita-content').value;
+        const tanggal = document.getElementById('berita-date').value;
+
+        try {
+          const response = await fetch(`${api}/news/berita`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ judul, konten, tanggal }),
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            showUploadGambarBerita(data.berita_id, judul);
+          } else {
+            alert('Gagal menyimpan berita');
+          }
+        } catch (error) {
+          alert('Error: ' + error.message);
+        }
+      }
+
+      function showUploadGambarBerita(beritaId, judulBerita) {
+        const content = `
+    <div>
+      <p style="background: #f0f9ff; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <strong>Berita:</strong> ${judulBerita}
+      </p>
+      
+      <form onsubmit="saveGambarBerita(event, ${beritaId}, '${judulBerita}')">
+        <div class="form-group">
+          <label>Upload Gambar</label>
+          <input type="file" id="gambar-berita" accept="image/*" required>
+        </div>
+        <div class="form-group">
+          <label>Deskripsi Gambar</label>
+          <textarea id="gambar-desc" rows="2" placeholder="Opsional"></textarea>
+        </div>
+        <div style="margin-top: 20px;">
+          <button type="button" class="btn btn-success" onclick="showInputSumberBerita(${beritaId}, '${judulBerita}')">Lanjut ke Sumber</button>
+        </div>
+      </form>
+    </div>
+  `;
+        showModal('Tambah Berita - Step 2: Upload Gambar', content);
+      }
+
+      async function saveGambarBerita(event, beritaId, judulBerita) {
+        event.preventDefault();
+
+        const gambarFile = document.getElementById('gambar-berita').files[0];
+        const deskripsi = document.getElementById('gambar-desc').value;
+
+        const formData = new FormData();
+        formData.append('foto', gambarFile);
+        formData.append('deskripsi', deskripsi);
+
+        try {
+          const response = await fetch(`${api}/news/berita/${beritaId}/foto`, {
+            method: 'POST',
+            body: formData,
+          });
+
+          if (response.ok) {
+            showInputSumberBerita(beritaId, judulBerita);
+          } else {
+            alert('Gagal upload gambar');
+          }
+        } catch (error) {
+          alert('Error: ' + error.message);
+        }
+      }
+
+      function skipToSumber(beritaId, judulBerita) {
+        showInputSumberBerita(beritaId, judulBerita);
+      }
+
+      function showInputSumberBerita(beritaId, judulBerita) {
+        const content = `
+    <div>
+      <p style="background: #f0f9ff; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <strong>Berita:</strong> ${judulBerita}
+      </p>
+      
+      <form onsubmit="saveSumberBerita(event, ${beritaId})">
+        <div class="form-group">
+          <label>Nama Sumber (Opsional)</label>
+          <input type="text" id="sumber-nama" placeholder="Contoh: Kompas.com">
+        </div>
+        <div class="form-group">
+          <label>Link Sumber (Opsional)</label>
+          <input type="url" id="sumber-link" placeholder="https://...">
+        </div>
+        <div style="margin-top: 20px;">
+          <button type="button" class="btn btn-secondary" onclick="finishBerita()">Skip & Selesai</button>
+          <button type="submit" class="btn btn-success">Simpan & Selesai</button>
+        </div>
+      </form>
+    </div>
+  `;
+        showModal('Tambah Berita - Step 3: Sumber (Opsional)', content);
+      }
+
+      async function saveSumberBerita(event, beritaId) {
+        event.preventDefault();
+
+        const nama = document.getElementById('sumber-nama').value;
+        const link = document.getElementById('sumber-link').value;
+
+        if (!nama && !link) {
+          finishBerita();
+          return;
+        }
+
+        try {
+          const response = await fetch(`${api}/news/berita/${beritaId}/sumber`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nama_sumber: nama, link_sumber: link }),
+          });
+
+          if (response.ok) {
+            finishBerita();
+          } else {
+            alert('Gagal menyimpan sumber');
+          }
+        } catch (error) {
+          alert('Error: ' + error.message);
+        }
+      }
+
+      function finishBerita() {
+        alert('Berita berhasil dibuat!');
+        closeModal();
+        loadPage('news');
+      }
+
+      function showFormBerita() {
+        const content = `
+    <form onsubmit="saveBeritaStep1(event)">
+      <div class="form-group">
+        <label>Judul Berita</label>
+        <input type="text" id="berita-title" required>
+      </div>
+      <div class="form-group">
+        <label>Konten Berita</label>
+        <textarea id="berita-content" rows="5" required></textarea>
+      </div>
+      <div class="form-group">
+        <label>Tanggal</label>
+        <input type="date" id="berita-date" required>
+      </div>
+      <div style="margin-top: 20px;">
+        <button type="submit" class="btn btn-success">Lanjut ke Upload Gambar</button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">Batal</button>
+      </div>
+    </form>
+  `;
+        showModal('Tambah Berita - Step 1: Info Berita', content);
+      }
+
+      function showFormPengumuman() {
+        const content = `
+    <form onsubmit="savePengumuman(event)">
+      <div class="form-group">
+        <label>Judul Pengumuman</label>
+        <input type="text" id="pengumuman-title" required>
+      </div>
+      <div class="form-group">
+        <label>Pesan Pengumuman</label>
+        <textarea id="pengumuman-pesan" rows="5" required></textarea>
+      </div>
+      <div style="margin-top: 20px;">
+        <button type="submit" class="btn btn-success">Simpan</button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">Batal</button>
+      </div>
+    </form>
+  `;
+        showModal('Tambah Pengumuman', content);
+      }
+
+      async function savePengumuman(event) {
+        event.preventDefault();
+        const judul = document.getElementById('pengumuman-title').value;
+        const pesan = document.getElementById('pengumuman-pesan').value;
+
+        try {
+          const response = await fetch(`${api}/news/pengumuman`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ judul, pesan }),
+          });
+
+          if (response.ok) {
+            alert('Pengumuman berhasil disimpan!');
+            closeModal();
+            loadPage('news');
+          } else {
+            alert('Gagal menyimpan pengumuman');
+          }
+        } catch (error) {
+          alert('Error: ' + error.message);
+        }
+      }
+
+      async function updateNews(event, id, type) {
+        event.preventDefault();
+
+        const judul = document.getElementById('edit-title').value;
+
+        try {
+          const endpoint = type === 'berita' ? `/news/berita/${id}` : `/news/pengumuman/${id}`;
+
+          if (type === 'berita') {
+            const konten = document.getElementById('edit-content').value;
+            const currentImage = document.getElementById('current-image').value;
+            const photoFile = document.getElementById('edit-photo').files[0];
+            const tanggal = document.getElementById('edit-date').value;
+
+            const formData = new FormData();
+            formData.append('judul', judul);
+            formData.append('konten', konten);
+            formData.append('tanggal', tanggal);
+
+            if (photoFile) {
+              formData.append('foto', photoFile);
+            } else {
+              formData.append('gambar', currentImage);
+            }
+
+            const response = await fetch(`${api}${endpoint}`, {
+              method: 'PUT',
+              body: formData,
+            });
+
+            if (response.ok) {
+              alert('Berita berhasil diupdate!');
+              closeModal();
+              loadPage('news');
+            } else {
+              const data = await response.json();
+              alert(data.error || 'Gagal mengupdate');
+            }
+          } else {
+            const pesan = document.getElementById('edit-pesan').value;
+
+            const response = await fetch(`${api}${endpoint}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ judul, pesan }),
+            });
+
+            if (response.ok) {
+              alert('Pengumuman berhasil diupdate!');
+              closeModal();
+              loadPage('news');
+            } else {
+              const data = await response.json();
+              alert(data.error || 'Gagal mengupdate');
+            }
+          }
+        } catch (error) {
+          console.error('Update news error:', error);
+          alert('Terjadi kesalahan: ' + error.message);
+        }
+      }
+
+      async function editNews(id, type) {
+        try {
+          const endpoint = type === 'berita' ? `/news/berita` : `/news/pengumuman`;
+          const response = await fetch(`${api}${endpoint}`);
+          if (!response.ok) throw new Error('Gagal mengambil data');
+
+          const allItems = await response.json();
+          const item = allItems.find((i) => i.id === id);
+
+          if (!item) throw new Error('Item tidak ditemukan');
+
+          let content = '';
+
+          if (type === 'berita') {
+            // FIX: Pastikan gambar dari database yang ditampilkan
+            const currentImage = item.gambar || '';
+            const imagePreview = currentImage.startsWith('/uploads')
+              ? `<img src="${currentImage}" style="max-width: 200px; border-radius: 8px; margin-bottom: 10px; display: block;">`
+              : `<div style="font-size: 3rem; margin-bottom: 10px;">${currentImage || '📰'}</div>`;
+
+            content = `
+      <form id="editNewsForm" onsubmit="updateNews(event, ${id}, '${type}')">
+        <div class="form-group">
+          <label>Judul</label>
+          <input type="text" id="edit-title" value="${item.judul}" required>
+        </div>
+        <div class="form-group">
+          <label>Konten</label>
+          <textarea id="edit-content" rows="5" required>${item.konten}</textarea>
+        </div>
+        <div class="form-group">
+          <label>Foto Saat Ini</label>
+          ${imagePreview}
+          <input type="hidden" id="current-image" value="${currentImage}">
+        </div>
+        <div class="form-group">
+          <label>Upload Foto Baru (opsional)</label>
+          <input type="file" id="edit-photo" accept="image/*">
+          <small style="color: #666;">Kosongkan jika tidak ingin mengubah foto</small>
+        </div>
+        <div class="form-group">
+          <label>Tanggal</label>
+          <input type="date" id="edit-date" value="${item.tanggal}" required>
+        </div>
+        <div style="margin-top: 20px;">
+          <button type="submit" class="btn btn-success">Update</button>
+          <button type="button" class="btn btn-secondary" onclick="closeModal()">Batal</button>
+        </div>
+      </form>
+    `;
+          } else {
+            content = `
+    <form id="editPengumumanForm" onsubmit="updateNews(event, ${id}, '${type}')">
+      <div class="form-group">
+        <label>Judul</label>
+        <input type="text" id="edit-title" value="${item.judul}" required>
+      </div>
+      <div class="form-group">
+        <label>Pesan</label>
+        <textarea id="edit-pesan" rows="5" required>${item.pesan}</textarea>
+      </div>
+      <div style="margin-top: 20px;">
+        <button type="submit" class="btn btn-success">Update</button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">Batal</button>
+      </div>
+    </form>
+  `;
+          }
+          showModal('Edit ' + (type === 'berita' ? 'Berita' : 'Pengumuman'), content);
+        } catch (error) {
+          console.error('Edit news error:', error);
+          alert('Gagal memuat data: ' + error.message);
+        }
+      }
+
+      async function deleteNews(id, type) {
+        const itemType = type === 'berita' ? 'berita' : 'pengumuman';
+        if (!confirm(`Apakah Anda yakin ingin menghapus ${itemType} ini?`)) return;
+
+        try {
+          const endpoint = type === 'berita' ? `/news/berita/${id}` : `/news/pengumuman/${id}`;
+          const response = await fetch(`${api}${endpoint}`, {
+            method: 'DELETE',
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            alert('Berhasil dihapus!');
+            loadPage('news');
+          } else {
+            alert(data.error || 'Gagal menghapus');
+          }
+        } catch (error) {
+          console.error('Delete news error:', error);
+          alert('Terjadi kesalahan: ' + error.message);
+        }
+      }
+
+      async function loadGalleryManagement(main) {
+        main.innerHTML = '<div class="loading">Loading...</div>';
+
+        try {
+          const response = await fetch(`${api}/gallery`);
+          if (!response.ok) throw new Error('Failed to fetch gallery');
+
+          const gallery = await response.json();
+
+          const page = currentPage.gallery || 1;
+          const startIndex = (page - 1) * itemsPerPage;
+          const paginatedGallery = gallery.slice(startIndex, startIndex + itemsPerPage);
+          const totalPages = Math.ceil(gallery.length / itemsPerPage);
+
+          let paginationHTML = '';
+          for (let i = 1; i <= totalPages; i++) {
+            paginationHTML += `<button class="${i === page ? 'active' : ''}" onclick="changePage('gallery', ${i})">${i}</button>`;
+          }
+
+          for (const item of paginatedGallery) {
+            if (item.acara_id) {
+              const acaraRes = await fetch(`${api}/gallery/acara/${item.acara_id}`);
+              const acara = await acaraRes.json();
+              item.deskripsi_acara = acara.deskripsi;
+            }
+          }
+          main.innerHTML = `
+      <div class="content-body">
+        <div class="flex-between" style="margin-bottom: 20px;">
+          <h2 class="section-title" style="margin: 0;">Manajemen Galeri Foto Kegiatan</h2>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn btn-secondary" onclick="exportGalleryPDF()">Export PDF</button>
+            <button class="btn btn-success" onclick="showAddGallery()">Tambah Foto</button>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 20px; display: flex; gap: 10px;">
+          <input type="text" id="search-gallery" placeholder="Cari galeri..." 
+                 style="flex: 1; padding: 10px; border: 2px solid #d1d5db; border-radius: 8px;"
+                 oninput="filterGallery()">
+          <input type="date" id="filter-gallery-date" style="padding: 10px; border: 2px solid #d1d5db; border-radius: 8px;" onchange="filterGallery()">
+        </div>
+
+        <table id="gallery-table">
+          <thead>
+            <tr>
+              <th>Judul</th>
+              <th>Tanggal</th>
+              <th>Deskripsi</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="gallery-tbody">
+            ${paginatedGallery
+              .map(
+                (item) => `
+              <tr data-title="${item.judul.toLowerCase()}" data-date="${item.tanggal}">
+                <td>${item.judul}</td>
+                <td>${item.tanggal}</td>
+                <td>${item.deskripsi_acara || '-'}</td>
+                <td class="action-buttons">
+                  <button class="btn btn-primary btn-sm" onclick="editGallery(${item.id})">Edit</button>
+                  <button class="btn btn-danger btn-sm" onclick="deleteGallery(${item.id})">Hapus</button>
+                </td>
+              </tr>
+            `
+              )
+              .join('')}
+          </tbody>
+        </table>
+
+        <div class="pagination">
+          ${paginationHTML}
+        </div>
+      </div>
+    `;
+
+          window.allGalleryData = gallery;
+        } catch (error) {
+          console.error('Load gallery error:', error);
+          main.innerHTML = `<div class="error">Gagal memuat galeri: ${error.message}</div>`;
+        }
+      }
+
+      function filterGallery() {
+        const searchTerm = document.getElementById('search-gallery').value.toLowerCase();
+        const filterDate = document.getElementById('filter-gallery-date').value;
+
+        const rows = document.querySelectorAll('#gallery-tbody tr');
+
+        rows.forEach((row) => {
+          const title = row.dataset.title;
+          const date = row.dataset.date;
+
+          const matchSearch = title.includes(searchTerm);
+          const matchDate = !filterDate || date === filterDate;
+
+          if (matchSearch && matchDate) {
+            row.style.display = '';
+          } else {
+            row.style.display = 'none';
+          }
+        });
+      }
+
+      async function exportGalleryPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        doc.setFontSize(18);
+        doc.text('Laporan Galeri Kegiatan', 14, 20);
+        doc.setFontSize(11);
+        doc.text(`Tanggal: ${new Date().toLocaleDateString('id-ID')}`, 14, 28);
+
+        const visibleRows = Array.from(document.querySelectorAll('#gallery-tbody tr')).filter(
+          (row) => row.style.display !== 'none'
+        );
+
+        const tableData = visibleRows.map((row) => {
+          const cells = row.querySelectorAll('td');
+          return [cells[0].textContent, cells[1].textContent, cells[2].textContent];
+        });
+
+        doc.autoTable({
+          startY: 35,
+          head: [['Judul', 'Tanggal', 'Deskripsi']],
+          body: tableData,
+          styles: { fontSize: 9 },
+          headStyles: { fillColor: [13, 43, 255] },
+        });
+
+        doc.save(`Laporan-Galeri-${new Date().toISOString().split('T')[0]}.pdf`);
+      }
+
+      function showAddGallery() {
+        const content = `
+    <form onsubmit="saveAcaraStep1(event)">
+      <div class="form-group">
+        <label>Nama Acara</label>
+        <input type="text" id="acara-title" required>
+      </div>
+      <div class="form-group">
+        <label>Deskripsi Acara</label>
+        <textarea id="acara-desc" rows="3" required></textarea>
+      </div>
+      <div class="form-group">
+        <label>Tanggal Acara</label>
+        <input type="date" id="acara-date" required>
+      </div>
+      <div style="margin-top: 20px;">
+        <button type="submit" class="btn btn-success">Lanjut ke Upload Foto</button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">Batal</button>
+      </div>
+    </form>
+  `;
+        showModal('Tambah Galeri - Step 1: Info Acara', content);
+      }
+
+      async function saveAcaraStep1(event) {
+        event.preventDefault();
+
+        const judul = document.getElementById('acara-title').value;
+        const deskripsi = document.getElementById('acara-desc').value;
+        const tanggal = document.getElementById('acara-date').value;
+
+        try {
+          const response = await fetch(`${api}/gallery/acara`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ judul, deskripsi, tanggal }),
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            showUploadFotoStep2(data.acara_id, judul);
+          } else {
+            alert('Gagal menyimpan acara');
+          }
+        } catch (error) {
+          alert('Error: ' + error.message);
+        }
+      }
+
+      function showUploadFotoStep2(acaraId, namaAcara) {
+        const content = `
+    <div>
+      <p style="background: #f0f9ff; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <strong>Acara:</strong> ${namaAcara}
+      </p>
+      
+      <form onsubmit="saveFotoAcara(event, ${acaraId})">
+        <div class="form-group">
+          <label>Upload Foto</label>
+          <input type="file" id="foto-acara" accept="image/*" required>
+        </div>
+        <div class="form-group">
+          <label>Deskripsi Foto (Opsional)</label>
+          <textarea id="foto-desc" rows="2" placeholder="Opsional"></textarea>
+        </div>
+        <div style="margin-top: 20px;">
+          <button type="submit" class="btn btn-success">Simpan & Selesai</button>
+          <button type="button" class="btn btn-secondary" onclick="closeModal()">Batal</button>
+        </div>
+      </form>
+    </div>
+  `;
+        showModal('Tambah Galeri - Step 2: Upload Foto', content);
+      }
+
+      async function saveFotoAcara(event, acaraId) {
+        event.preventDefault();
+
+        const fotoFile = document.getElementById('foto-acara').files[0];
+        const deskripsi = document.getElementById('foto-desc').value;
+
+        const formData = new FormData();
+        formData.append('acara_id', acaraId);
+        formData.append('foto', fotoFile);
+        formData.append('deskripsi', deskripsi);
+
+        try {
+          const response = await fetch(`${api}/gallery/foto`, {
+            method: 'POST',
+            body: formData,
+          });
+
+          if (response.ok) {
+            alert('Galeri berhasil ditambahkan!');
+            closeModal();
+            loadPage('gallery');
+          } else {
+            alert('Gagal upload foto');
+          }
+        } catch (error) {
+          alert('Error: ' + error.message);
+        }
+      }
+
+      // Ganti function editGallery
+      async function editGallery(id) {
+        try {
+          const response = await fetch(`${api}/gallery`);
+          if (!response.ok) throw new Error('Failed to fetch');
+
+          const allItems = await response.json();
+          const item = allItems.find((i) => i.id === id);
+
+          if (!item) throw new Error('Item tidak ditemukan');
+
+          const content = `
+  <form onsubmit="updateGallery(event, ${id})">
+    <div class="form-group">
+      <label>Judul Acara</label>
+      <input type="text" id="edit-gallery-title" value="${item.judul}" required>
+    </div>
+    <div class="form-group">
+      <label>Deskripsi Acara</label>
+      <textarea id="edit-gallery-desc" required>${item.deskripsi_acara || ''}</textarea>
+    </div>
+    <div class="form-group">
+      <label>Tanggal Acara</label>
+      <input type="date" id="edit-gallery-date" value="${item.tanggal}" required>
+    </div>
+        <div class="form-group">
+          <label>Foto Saat Ini</label>
+          ${
+            item.gambar_url && item.gambar_url.startsWith('/uploads')
+              ? `<img src="${item.gambar_url}" style="max-width: 200px; border-radius: 8px; margin-bottom: 10px;">`
+              : `<div style="font-size: 3rem;">${item.gambar_url}</div>`
+          }
+        </div>
+        <div class="form-group">
+          <label>Upload Foto Baru</label>
+          <input type="file" id="edit-gallery-photo" accept="image/*">
+        </div>
+        <div style="margin-top: 20px;">
+          <button type="submit" class="btn btn-success">Update</button>
+          <button type="button" class="btn btn-secondary" onclick="closeModal()">Batal</button>
+        </div>
+      </form>
+    `;
+          showModal('Edit Galeri', content);
+        } catch (error) {
+          console.error('Edit gallery error:', error);
+          alert('Gagal memuat data: ' + error.message);
+        }
+      }
+
+      // Ganti function updateGallery
+      async function updateGallery(event, id) {
+        event.preventDefault();
+
+        const judul = document.getElementById('edit-gallery-title').value;
+        const deskripsi = document.getElementById('edit-gallery-desc').value;
+        const tanggal = document.getElementById('edit-gallery-date').value;
+        const photoFile = document.getElementById('edit-gallery-photo').files[0];
+
+        const formData = new FormData();
+        formData.append('judul', judul);
+        formData.append('deskripsi', deskripsi);
+        formData.append('tanggal', tanggal);
+
+        if (!deskripsi) {
+          return alert('Deskripsi acara harus diisi.');
+        }
+
+        try {
+          const response = await fetch(`${api}/gallery/${id}`, {
+            method: 'PUT',
+            body: formData,
+          });
+
+          if (response.ok) {
+            alert('Galeri berhasil diupdate!');
+            closeModal();
+            loadPage('gallery');
+          } else {
+            const data = await response.json();
+            alert(data.error || 'Gagal mengupdate');
+          }
+        } catch (error) {
+          console.error('Update gallery error:', error);
+          alert('Terjadi kesalahan: ' + error.message);
+        }
+      }
+
+      async function deleteGallery(id) {
+        if (!confirm('Hapus item galeri ini?')) return;
+
+        try {
+          const response = await fetch(`${api}/gallery/${id}`, {
+            method: 'DELETE',
+          });
+
+          if (response.ok) {
+            alert('Galeri berhasil dihapus!');
+            loadPage('gallery');
+          } else {
+            alert('Gagal menghapus');
+          }
+        } catch (error) {
+          console.error('Delete gallery error:', error);
+          alert('Terjadi kesalahan: ' + error.message);
+        }
+      }
+
+      async function loadScheduleManagement(main) {
+        main.innerHTML = '<div class="loading">Loading...</div>';
+
+        try {
+          const studentsResponse = await fetch(`${api}/students`);
+          const students = await studentsResponse.json();
+
+          const kelasMap = {};
+          students.forEach((s) => {
+            if (s.kelas && s.kelasid) {
+              if (!kelasMap[s.kelas]) {
+                kelasMap[s.kelas] = s.kelasid;
+              }
+            }
+          });
+
+          let kelasList = Object.keys(kelasMap).sort();
+
+          if (user.role === 'class_account' && user.kelas) {
+            kelasList = kelasList.filter((k) => k === user.kelas);
+          }
+
+          console.log('📚 Kelas visible to user:', kelasList);
+
+          if (kelasList.length === 0) {
+            main.innerHTML = `<div class="content-body">
+        <h2 class="section-title">Jadwal Pelajaran</h2>
+        <p style="padding: 40px; text-align: center; color: #64748b;">
+          Belum ada data kelas.
+        </p>
+      </div>`;
+            return;
+          }
+
+          let scheduleHTML = '';
+
+          for (const kelas of kelasList) {
+            const kelasID = kelasMap[kelas];
+
+            const scheduleResponse = await fetch(`${api}/schedule/detail/${kelasID}`);
+            const scheduleDetail = await scheduleResponse.json();
+
+            // TAMBAHKAN CEK INI:
+            if (!scheduleResponse.ok || !Array.isArray(scheduleDetail)) {
+              scheduleHTML += `
+    <div style="margin-bottom: 30px;">
+      <div class="flex-between" style="margin-bottom: 15px;">
+        <h3>Kelas ${kelas}</h3>
+        <button class="btn btn-primary btn-sm" onclick="inputSchedule(${kelasID}, '${kelas}')">Input Jadwal</button>
+      </div>
+      <p style="padding: 20px; background: #fff3cd; color: #856404; border-radius: 8px;">
+        Belum ada jadwal untuk kelas ini. Klik "Input Jadwal" untuk mengatur jadwal.
+      </p>
+    </div>
+  `;
+              continue;
+            }
+
+            // Group by hari, 4 jam per hari
+            const scheduleByDay = {
+              Senin: [null, null, null, null],
+              Selasa: [null, null, null, null],
+              Rabu: [null, null, null, null],
+              Kamis: [null, null, null, null],
+              Jumat: [null, null, null, null],
+            };
+
+            scheduleDetail.forEach((item) => {
+              if (scheduleByDay[item.hari] && item.jamke !== undefined && item.jamke < 4) {
+                scheduleByDay[item.hari][item.jamke] = {
+                  pelajaran: item.namapelajaran,
+                  guru: item.nama_guru || '-',
+                };
+              }
+            });
+
+            const jamLabels = ['07.00-08.45', '09.00-10.45', '11.00-12.00', '12.00-13.00'];
+
+            scheduleHTML += `
+        <div style="margin-bottom: 30px;">
+          <div class="flex-between" style="margin-bottom: 15px;">
+            <h3>Kelas ${kelas}</h3>
+            <button class="btn btn-primary btn-sm" onclick="inputSchedule(${kelasID}, '${kelas}')">Input Jadwal</button>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Hari</th>
+                ${jamLabels.map((j) => `<th>${j}</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+              ${['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat']
+                .map((hari) => {
+                  const schedule = scheduleByDay[hari];
+                  return `
+                <tr>
+                  <td><strong>${hari}</strong></td>
+                  ${schedule
+                    .map(
+                      (item) =>
+                        `<td>${item ? `${item.pelajaran}<br><small style="color: #666;">${item.guru}</small>` : '-'}</td>`
+                    )
+                    .join('')}
+                </tr>
+              `;
+                })
+                .join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+          }
+
+          main.innerHTML = `
+      <div class="content-body">
+        <h2 class="section-title">Jadwal Pelajaran (Jam 7 Pagi - 1 Siang)</h2>
+        <p style="color: #64748b; margin-bottom: 20px;">
+          Istirahat 1: 08.45-09.00 | Istirahat 2: 10.45-11.00
+        </p>
+        ${scheduleHTML}
+      </div>
+    `;
+        } catch (error) {
+          console.error('Load schedule error:', error);
+          main.innerHTML = `<div class="error">Gagal memuat jadwal: ${error.message}</div>`;
+        }
+      }
+
+      async function inputSchedule(kelasId, namaKelas) {
+        try {
+          const [pelajaranResponse, guruResponse, existingScheduleResponse] = await Promise.all([
+            fetch(`${api}/report/pelajaran`),
+            fetch(`${api}/teachers`),
+            fetch(`${api}/schedule/detail/${kelasId}`),
+          ]);
+
+          const pelajaran = await pelajaranResponse.json();
+          const guru = await guruResponse.json();
+          const existingSchedule = await existingScheduleResponse.json();
+
+          // Parse existing schedule ke format yang mudah diakses
+          const scheduleMap = {};
+          if (Array.isArray(existingSchedule)) {
+            existingSchedule.forEach((item) => {
+              const key = `${item.hari}-${item.jamke}`;
+              scheduleMap[key] = {
+                pelajaran_id: item.pelajaranid,
+                guru_id: item.guru_id,
+              };
+            });
+          }
+
+          let formHTML = '<div style="max-height: 60vh; overflow-y: auto;">';
+
+          ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat'].forEach((hari) => {
+            formHTML += `
+        <div style="margin-bottom: 25px; padding: 20px; background: #f8fafc; border-radius: 8px;">
+          <h4 style="margin-bottom: 15px; color: #0d2bff;">${hari}</h4>
+          <div style="display: grid; gap: 15px;">
+      `;
+
+            const jamLabels = ['07.00-08.45', '09.00-10.45', '11.00-12.00', '12.00-13.00'];
+
+            for (let jam = 0; jam < 4; jam++) {
+              const key = `${hari}-${jam}`;
+              const existing = scheduleMap[key] || {};
+
+              formHTML += `
+          <div style="display: grid; grid-template-columns: 100px 1fr 1fr; gap: 10px; align-items: center;">
+            <label style="font-weight: 500;">${jamLabels[jam]}:</label>
+            <select class="schedule-pelajaran" data-hari="${hari}" data-jam="${jam}" 
+                    onchange="updateAvailableOptions('${hari}')"
+                    style="padding: 10px; border: 2px solid #d1d5db; border-radius: 6px;">
+              <option value="">-- Pilih Pelajaran --</option>
+              ${pelajaran
+                .map(
+                  (p) =>
+                    `<option value="${p.pelajaranid}" ${existing.pelajaran_id == p.pelajaranid ? 'selected' : ''}>${p.namapelajaran}</option>`
+                )
+                .join('')}
+            </select>
+            <select class="schedule-guru" data-hari="${hari}" data-jam="${jam}" 
+                    onchange="updateAvailableOptions('${hari}')"
+                    style="padding: 10px; border: 2px solid #d1d5db; border-radius: 6px;">
+              <option value="">-- Pilih Guru --</option>
+              ${guru
+                .map(
+                  (g) =>
+                    `<option value="${g.id}" ${existing.guru_id == g.id ? 'selected' : ''}>${g.nama}</option>`
+                )
+                .join('')}
+            </select>
+          </div>
+        `;
+            }
+
+            formHTML += `</div></div>`;
+          });
+
+          formHTML += `
+      </div>
+      <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #e2e8f0;">
+        <button type="button" class="btn btn-success" onclick="saveSchedule(${kelasId})">Simpan Jadwal</button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">Batal</button>
+      </div>
+    `;
+
+          showModal(`Input Jadwal Kelas ${namaKelas}`, formHTML);
+        } catch (error) {
+          console.error('Input schedule error:', error);
+          alert('Gagal memuat form: ' + error.message);
+        }
+      }
+
+      function updateAvailableOptions(hari) {
+        const pelajaranSelects = document.querySelectorAll(
+          `.schedule-pelajaran[data-hari="${hari}"]`
+        );
+        const guruSelects = document.querySelectorAll(`.schedule-guru[data-hari="${hari}"]`);
+
+        // Kumpulkan yang sudah dipilih
+        const selectedPelajaran = Array.from(pelajaranSelects)
+          .map((sel, idx) => ({ index: idx, value: sel.value }))
+          .filter((s) => s.value);
+
+        const selectedGuru = Array.from(guruSelects)
+          .map((sel, idx) => ({ index: idx, value: sel.value }))
+          .filter((s) => s.value);
+
+        // Disable opsi yang sudah dipilih
+        pelajaranSelects.forEach((select, currentIdx) => {
+          Array.from(select.options).forEach((option) => {
+            if (option.value) {
+              const isSelected = selectedPelajaran.some(
+                (s) => s.value === option.value && s.index !== currentIdx
+              );
+              option.disabled = isSelected;
+              option.style.color = isSelected ? '#999' : '';
+            }
+          });
+        });
+
+        guruSelects.forEach((select, currentIdx) => {
+          Array.from(select.options).forEach((option) => {
+            if (option.value) {
+              const isSelected = selectedGuru.some(
+                (s) => s.value === option.value && s.index !== currentIdx
+              );
+              option.disabled = isSelected;
+              option.style.color = isSelected ? '#999' : '';
+            }
+          });
+        });
+      }
+
+      async function saveSchedule(kelasId) {
+        try {
+          const schedules = [];
+          const pelajaranSelects = document.querySelectorAll('.schedule-pelajaran');
+          const guruSelects = document.querySelectorAll('.schedule-guru');
+
+          pelajaranSelects.forEach((select, index) => {
+            const hari = select.dataset.hari;
+            const jam = parseInt(select.dataset.jam);
+            const pelajaran_id = select.value;
+            const guru_id = guruSelects[index].value;
+
+            // HANYA simpan jika KEDUA field terisi
+            if (pelajaran_id && guru_id) {
+              // Buat tanggal dummy untuk bulan ini dengan jam sesuai
+              const today = new Date();
+              const timestamp = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+              // Set jam berdasarkan jam ke-berapa
+              const jamWaktu = [7, 9, 11, 12]; // Jam mulai untuk setiap slot
+              timestamp.setHours(jamWaktu[jam], 0, 0, 0);
+
+              schedules.push({
+                hari,
+                pelajaran_id: parseInt(pelajaran_id),
+                guru_id: parseInt(guru_id),
+                tanggal: timestamp.toISOString(),
+              });
+            }
+          });
+
+          const response = await fetch(`${api}/schedule/${kelasId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ schedules }),
+          });
+
+          if (response.ok) {
+            alert('Jadwal berhasil diupdate!');
+            closeModal();
+            loadPage('schedule');
+          } else {
+            const data = await response.json();
+            alert(data.error || 'Gagal menyimpan jadwal');
+          }
+        } catch (error) {
+          console.error('Save schedule error:', error);
+          alert('Terjadi kesalahan: ' + error.message);
+        }
+      }
+
+      // Ganti function loadRaporManagement
+      async function loadRaporManagement(main) {
+        main.innerHTML = '<div class="loading">Loading...</div>';
+
+        try {
+          const studentsResponse = await fetch(`${api}/students`);
+          const allStudents = await studentsResponse.json();
+
+          let filteredStudents = allStudents;
+          if (user.role === 'class_account' && user.kelas) {
+            filteredStudents = allStudents.filter((s) => s.kelas === user.kelas);
+          }
+
+          const studentsByClass = {};
+          filteredStudents.forEach((s) => {
+            if (s.kelas) {
+              if (!studentsByClass[s.kelas]) {
+                studentsByClass[s.kelas] = [];
+              }
+              studentsByClass[s.kelas].push(s);
+            }
+          });
+
+          let tableHTML = '';
+          for (const [kelas, siswaList] of Object.entries(studentsByClass).sort()) {
+            tableHTML += `
+<div style="margin-bottom: 30px;">
+  <h4 style="margin-bottom: 15px; color: #0d2bff;">Kelas ${kelas}</h4>
+
+  <div style="margin-bottom: 15px;">
+    <input type="text" id="search-rapor-${kelas}" placeholder="Cari nama siswa..." 
+           style="width: 100%; padding: 10px; border: 2px solid #d1d5db; border-radius: 8px;"
+           oninput="filterRaporSiswa('${kelas}')">
+  </div>
+  
+  <table id="rapor-table-${kelas}" style="font-size: 0.9rem;">
+    <thead>
+      <tr>
+        <th>Nama Siswa</th>
+        <th>Semester 1</th>
+        <th>Semester 2</th>
+        <th>Aksi</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${siswaList
+        .map(
+          (siswa) => `
+        <tr data-nama="${siswa.nama.toLowerCase()}" data-kelas="${kelas}">
+          <td><strong>${siswa.nama}</strong></td>
+          <td id="status-sem1-${siswa.id}">...</td>
+          <td id="status-sem2-${siswa.id}">...</td>
+          <td class="action-buttons" style="flex-wrap: wrap;">
+            <button class="btn btn-primary btn-sm" onclick="showManageNilai(${siswa.id}, '${siswa.nama}', 1)" title="Input Nilai Semester 1">📝 Nilai S1</button>
+            <button class="btn btn-primary btn-sm" onclick="showManageNilai(${siswa.id}, '${siswa.nama}', 2)" title="Input Nilai Semester 2">📝 Nilai S2</button>
+            <button class="btn btn-success btn-sm" onclick="editKomentarRapor(${siswa.id}, '${siswa.nama}', 1)" title="Komentar Semester 1">💬 Komentar S1</button>
+            <button class="btn btn-success btn-sm" onclick="editKomentarRapor(${siswa.id}, '${siswa.nama}', 2)" title="Komentar Semester 2">💬 Komentar S2</button>
+            <button class="btn btn-secondary btn-sm" onclick="viewRaporLengkap(${siswa.id}, '${siswa.nama}')" title="Lihat Rapor Lengkap">👁️ Rapor</button>
+          </td>
+        </tr>
+      `
+        )
+        .join('')}
+    </tbody>
+  </table>
+</div>
+      `;
+          }
+
+          main.innerHTML = `
+      <div class="content-body">
+        <h2 class="section-title">Manajemen Rapor & Nilai Siswa</h2>
+        <div style="background: #e0f2fe; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+          <strong>ℹ️ Format Nilai:</strong><br>
+          ℹ️ <strong>Semester 1:</strong> Nilai Ulangan Harian 1 + Ulangan Harian 2 + Ulangan Harian 3 + Ulangan Harian 4 + UTS + UAS<br>
+          ℹ️ <strong>Semester 2:</strong> Nilai Ulangan Harian 1 + Ulangan Harian 2 + Ulangan Harian 3 + Ulangan Harian 4 + UTS + UAS<br>
+          ℹ️ Klik "👁️ Rapor" untuk melihat rapor lengkap (termasuk preview POV siswa)
+        </div>
+        ${tableHTML}
+      </div>
+    `;
+
+          // Load status rapor
+          setTimeout(async () => {
+            const tahunAjaranResponse = await fetch(`${api}/tahun-ajaran/active`);
+            const tahunAjaran = await tahunAjaranResponse.json();
+
+            for (const siswaList of Object.values(studentsByClass)) {
+              for (const siswa of siswaList) {
+                await loadRaporStatus(siswa.id, tahunAjaran?.id);
+              }
+            }
+          }, 100);
+        } catch (error) {
+          console.error('Load rapor error:', error);
+          main.innerHTML = `<div class="error">Gagal memuat rapor: ${error.message}</div>`;
+        }
+      }
+
+      function filterRaporSiswa(kelas) {
+        const searchTerm = document.getElementById(`search-rapor-${kelas}`).value.toLowerCase();
+        const table = document.querySelector(`#rapor-table-${kelas}`);
+        if (!table) return;
+
+        const rows = table.querySelectorAll('tbody tr');
+        rows.forEach((row) => {
+          const nama = row.dataset.nama || '';
+          if (nama.includes(searchTerm)) {
+            row.style.display = '';
+          } else {
+            row.style.display = 'none';
+          }
+        });
+      }
+
+      async function showManageRapor() {
+        try {
+          const [studentsResponse, tahunAjaranResponse] = await Promise.all([
+            fetch(`${api}/students`),
+            fetch(`${api}/tahun-ajaran/active`),
+          ]);
+
+          const students = await studentsResponse.json();
+          const tahunAjaran = await tahunAjaranResponse.json();
+
+          // Group by kelas
+          const studentsByClass = {};
+          students.forEach((s) => {
+            if (s.kelas) {
+              if (!studentsByClass[s.kelas]) {
+                studentsByClass[s.kelas] = [];
+              }
+              studentsByClass[s.kelas].push(s);
+            }
+          });
+
+          let tableHTML = '';
+          for (const [kelas, siswaList] of Object.entries(studentsByClass).sort()) {
+            tableHTML += `
+        <div style="margin-bottom: 30px;">
+          <h4 style="margin-bottom: 15px; color: #0d2bff;">Kelas ${kelas}</h4>
+          <table style="font-size: 0.9rem;">
+            <thead>
+              <tr>
+                <th>Nama Siswa</th>
+                <th>Semester 1</th>
+                <th>Semester 2</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${siswaList
+                .map(
+                  (siswa) => `
+                <tr>
+                  <td>${siswa.nama}</td>
+                  <td id="status-sem1-${siswa.id}">...</td>
+                  <td id="status-sem2-${siswa.id}">...</td>
+                  <td class="action-buttons">
+                    <button class="btn btn-primary btn-sm" onclick="editKomentarRapor(${siswa.id}, '${siswa.nama}', 1)">Sem 1</button>
+                    <button class="btn btn-primary btn-sm" onclick="editKomentarRapor(${siswa.id}, '${siswa.nama}', 2)">Sem 2</button>
+                    <button class="btn btn-success btn-sm" onclick="viewRaporLengkap(${siswa.id}, '${siswa.nama}')">Lihat</button>
+                  </td>
+                </tr>
+              `
+                )
+                .join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+          }
+
+          const content = `
+      <div style="max-height: 70vh; overflow-y: auto;">
+        <p style="margin-bottom: 20px; color: #666;">
+          Tahun Ajaran Aktif: <strong>${tahunAjaran ? `${tahunAjaran.tahun_mulai}/${tahunAjaran.tahun_akhir}` : 'Tidak ada'}</strong>
+        </p>
+        ${tableHTML}
+      </div>
+      <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #e2e8f0;">
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">Tutup</button>
+      </div>
+    `;
+
+          showModal('Kelola Rapor Siswa', content);
+
+          // Load status rapor untuk setiap siswa
+          setTimeout(async () => {
+            for (const siswaList of Object.values(studentsByClass)) {
+              for (const siswa of siswaList) {
+                await loadRaporStatus(siswa.id, tahunAjaran?.id);
+              }
+            }
+          }, 100);
+        } catch (error) {
+          alert('Gagal memuat data: ' + error.message);
+        }
+      }
+
+      async function loadRaporStatus(siswaId, tahunAjaranId) {
+        try {
+          if (!tahunAjaranId) return;
+
+          const [nilaiResponse, raporResponse, tahunAjaranResponse] = await Promise.all([
+            fetch(`${api}/report/nilai/${siswaId}`),
+            fetch(`${api}/report/rapor/${siswaId}`),
+            fetch(`${api}/tahun-ajaran/active`),
+          ]);
+
+          const allNilai = await nilaiResponse.json();
+          const allRapor = await raporResponse.json();
+          const tahunAjaran = await tahunAjaranResponse.json();
+          const tahunAjaranStr = `${tahunAjaran.tahun_mulai}/${tahunAjaran.tahun_akhir}`;
+
+          for (let sem = 1; sem <= 2; sem++) {
+            const nilaiSem = allNilai.filter((n) => {
+              const matchSemester = n.semester == sem;
+              const matchTahunAjaran = n.tahun_ajaran === tahunAjaranStr;
+              const hasKeterangan = n.keterangan && n.keterangan !== 'manual_input';
+
+              const hasValidFormat =
+                n.keterangan?.includes('uh1:') &&
+                n.keterangan?.includes('uh2:') &&
+                n.keterangan?.includes('uh3:') &&
+                n.keterangan?.includes('uh4:') &&
+                n.keterangan?.includes('uts:') &&
+                n.keterangan?.includes('uas:');
+
+              return matchSemester && matchTahunAjaran && hasKeterangan && hasValidFormat;
+            });
+
+            const raporSem = allRapor.find(
+              (r) => r.semester == sem && r.tahun_ajaran === tahunAjaranStr
+            );
+            const statusEl = document.getElementById(`status-sem${sem}-${siswaId}`);
+            if (!statusEl) continue;
+
+            let lengkap = false;
+            let statusHTML = '';
+
+            // Cek semua 6 komponen nilai ada
+            lengkap = nilaiSem.every((n) => {
+              return (
+                n.keterangan?.includes('uh1:') &&
+                n.keterangan.includes('uh2:') &&
+                n.keterangan.includes('uh3:') &&
+                n.keterangan.includes('uh4:') &&
+                n.keterangan.includes('uts:') &&
+                n.keterangan.includes('uas:')
+              );
+            });
+
+            if (nilaiSem.length === 0) {
+              statusHTML += `<span style="color:#f59e0b;">⚠️ Belum ada nilai</span>`;
+            } else {
+              if (lengkap) {
+                statusHTML += `<span style="color:#10b981;">✅ ${nilaiSem.length} nilai lengkap</span>`;
+              } else {
+                statusHTML += `<span style="color:#3b82f6;">📝 ${nilaiSem.length} nilai terinput</span>`;
+              }
+            }
+
+            statusHTML += raporSem?.komentar
+              ? ` | <span style="color:#10b981;">✅ Ada komentar</span>`
+              : ` | <span style="color:#f59e0b;">⚠️ Belum ada komentar</span>`;
+
+            statusEl.innerHTML = statusHTML;
+          }
+        } catch (error) {
+          console.error('Load rapor status error:', error);
+        }
+      }
+
+      // Edit komentar rapor
+      async function editKomentarRapor(siswaId, namaSiswa, semester) {
+        try {
+          const tahunAjaranResponse = await fetch(`${api}/tahun-ajaran/active`);
+          const tahunAjaran = await tahunAjaranResponse.json();
+
+          if (!tahunAjaran) {
+            alert('Belum ada tahun ajaran aktif');
+            return;
+          }
+
+          const raporResponse = await fetch(`${api}/report/rapor/${siswaId}`);
+          const raporList = await raporResponse.json();
+          const existingRapor = raporList.find(
+            (r) =>
+              r.semester == semester &&
+              r.tahun_ajaran === `${tahunAjaran.tahun_mulai}/${tahunAjaran.tahun_akhir}`
+          );
+
+          let naikKelasHTML = '';
+          if (semester == 2) {
+            const isNaikKelas =
+              existingRapor?.komentar && !existingRapor.komentar.includes('[TIDAK_NAIK]');
+            naikKelasHTML = `
+        <div class="form-group">
+          <label>
+            <input type="checkbox" id="naik-kelas" ${isNaikKelas ? 'checked' : ''}> 
+            Naik Kelas
+          </label>
+        </div>
+      `;
+          }
+
+          const cleanKomentar = existingRapor?.komentar
+            ? existingRapor.komentar.replace('[TIDAK_NAIK]', '')
+            : '';
+
+          const content = `
+      <form onsubmit="saveKomentarRapor(event, ${siswaId}, ${semester}, ${tahunAjaran.id})">
+        <div class="form-group">
+          <label>Siswa</label>
+          <input type="text" value="${namaSiswa}" readonly style="background: #f3f4f6;">
+        </div>
+        <div class="form-group">
+          <label>Semester</label>
+          <input type="text" value="Semester ${semester}" readonly style="background: #f3f4f6;">
+        </div>
+        <div class="form-group">
+          <label>Tahun Ajaran</label>
+          <input type="text" value="${tahunAjaran.tahun_mulai}/${tahunAjaran.tahun_akhir}" readonly style="background: #f3f4f6;">
+        </div>
+        ${naikKelasHTML}
+        <div class="form-group">
+          <label>Komentar Wali Kelas</label>
+          <textarea id="komentar-rapor" rows="5" required>${cleanKomentar}</textarea>
+        </div>
+        <div style="margin-top: 20px;">
+          <button type="submit" class="btn btn-success">Simpan</button>
+          <button type="button" class="btn btn-secondary" onclick="closeModal()">Batal</button>
+        </div>
+      </form>
+    `;
+
+          showModal(`Komentar Rapor - ${namaSiswa}`, content);
+        } catch (error) {
+          alert('Gagal memuat data: ' + error.message);
+        }
+      }
+
+      // Simpan komentar rapor
+      async function saveKomentarRapor(event, siswaId, semester, tahunAjaranId) {
+        event.preventDefault();
+
+        let komentar = document.getElementById('komentar-rapor').value;
+
+        if (semester == 2) {
+          const naikKelasCheckbox = document.getElementById('naik-kelas');
+          const naikKelas = naikKelasCheckbox ? naikKelasCheckbox.checked : true;
+
+          if (!naikKelas) {
+            komentar = '[TIDAK_NAIK]' + komentar;
+          }
+        }
+
+        try {
+          const response = await fetch(`${api}/report/rapor`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              siswa_id: siswaId,
+              semester: semester.toString(),
+              tahun_ajaran_id: tahunAjaranId,
+              komentar,
+            }),
+          });
+
+          if (response.ok) {
+            alert('Komentar rapor berhasil disimpan!');
+            closeModal();
+            loadPage('rapor');
+          } else {
+            const data = await response.json();
+            alert(data.error || 'Gagal menyimpan');
+          }
+        } catch (error) {
+          alert('Terjadi kesalahan: ' + error.message);
+        }
+      }
+
+      async function viewRaporLengkap(siswaId, namaSiswa) {
+        try {
+          const [nilaiResponse, raporResponse, siswaResponse] = await Promise.all([
+            fetch(`${api}/report/nilai/${siswaId}`),
+            fetch(`${api}/report/rapor/${siswaId}`),
+            fetch(`${api}/students/${siswaId}`),
+          ]);
+
+          const nilai = await nilaiResponse.json();
+          const rapor = await raporResponse.json();
+          const siswaData = await siswaResponse.json();
+
+          if (rapor.length === 0) {
+            alert('Belum ada data rapor untuk siswa ini');
+            return;
+          }
+
+          let contentHTML = '';
+
+          rapor.forEach((r) => {
+            const nilaiSemester = nilai.filter(
+              (n) => n.semester == r.semester && n.tahun_ajaran === r.tahun_ajaran
+            );
+
+            contentHTML += `
+<div style="margin-bottom: 30px; padding: 20px; background: #f8fafc; border-radius: 8px;">
+  <h4 style="color: #0d2bff;">Semester ${r.semester} - ${r.tahun_ajaran}</h4>
+  ${
+    nilaiSemester.length > 0
+      ? `<div style="overflow-x: auto;">
+          <table style="margin: 15px 0; font-size: 0.9rem; min-width: 800px;">
+          <thead>
+            <tr>
+              <th>Mata Pelajaran</th>
+              <th>UH1</th>
+              <th>UH2</th>
+              <th>UH3</th>
+              <th>UH4</th>
+              <th>UTS</th>
+              <th>UAS</th>
+              <th>Rata-rata</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${nilaiSemester
+              .map((n) => {
+                let uh1 = '-',
+                  uh2 = '-',
+                  uh3 = '-',
+                  uh4 = '-',
+                  uts = '-',
+                  uas = '-';
+
+                if (n.keterangan) {
+                  const parts = n.keterangan.split('|');
+                  parts.forEach((part) => {
+                    if (part.startsWith('uh1:')) uh1 = part.split(':')[1] || '-';
+                    if (part.startsWith('uh2:')) uh2 = part.split(':')[1] || '-';
+                    if (part.startsWith('uh3:')) uh3 = part.split(':')[1] || '-';
+                    if (part.startsWith('uh4:')) uh4 = part.split(':')[1] || '-';
+                    if (part.startsWith('uts:')) uts = part.split(':')[1] || '-';
+                    if (part.startsWith('uas:')) uas = part.split(':')[1] || '-';
+                  });
+                }
+
+                return `
+                  <tr>
+                    <td><strong>${n.nama_pelajaran}</strong></td>
+                    <td>${uh1}</td>
+                    <td>${uh2}</td>
+                    <td>${uh3}</td>
+                    <td>${uh4}</td>
+                    <td>${uts}</td>
+                    <td>${uas}</td>
+                    <td><strong style="color: #0d2bff;">${n.nilai}</strong></td>
+                  </tr>
+                `;
+              })
+              .join('')}
+          </tbody>
+        </table>
+        </div>`
+      : '<p style="color: #666;">Belum ada nilai</p>'
+  }
+        <div style="margin-top: 15px;">
+          <strong>Komentar Wali Kelas:</strong>
+          <p style="margin-top: 8px; padding: 15px; background: white; border-radius: 6px;">
+            ${
+              r.komentar
+                ? r.komentar.replace('[TIDAK_NAIK]', '❌ TIDAK NAIK KELAS - ')
+                : '<em style="color: #999;">Belum ada komentar</em>'
+            }
+          </p>
+        </div>
+      </div>
+    `;
+          });
+
+          const content = `
+    <div style="max-height: 70vh; overflow-y: auto;">
+      ${contentHTML}
+    </div>
+    <div style="margin-top: 20px; display: flex; gap: 10px;">
+      <button type="button" class="btn btn-primary" onclick="previewRaporSiswa(${siswaId}, '${namaSiswa}', '${siswaData.kelas}')">👁️ Preview POV Siswa</button>
+      <button type="button" class="btn btn-secondary" onclick="closeModal()">Tutup</button>
+    </div>
+  `;
+
+          showModal(`Rapor Lengkap - ${namaSiswa}`, content);
+        } catch (error) {
+          console.error('View rapor error:', error);
+          alert('Gagal memuat rapor: ' + error.message);
+        }
+      }
+
+      async function previewRaporSiswa(siswaId, namaSiswa, kelas) {
+        try {
+          const [nilaiResponse, raporResponse, tahunAjaranResponse] = await Promise.all([
+            fetch(`${api}/report/nilai/${siswaId}`),
+            fetch(`${api}/report/rapor/${siswaId}`),
+            fetch(`${api}/tahun-ajaran/active`),
+          ]);
+
+          const nilai = await nilaiResponse.json();
+          const rapor = await raporResponse.json();
+
+          if (rapor.length === 0) {
+            alert('Belum ada data rapor');
+            return;
+          }
+
+          let raporHTML = '';
+
+          rapor.forEach((r) => {
+            const nilaiSemester = nilai.filter(
+              (n) => n.semester == r.semester && n.tahun_ajaran === r.tahun_ajaran
+            );
+
+            const statusNaik = r.komentar && !r.komentar.includes('[TIDAK_NAIK]');
+            const cleanKomentar = r.komentar ? r.komentar.replace('[TIDAK_NAIK]', '') : '';
+
+            raporHTML += `
+<div style="background: white; padding: 40px; margin: 20px 0; border: 2px solid #0d2bff; border-radius: 12px; page-break-after: always;">
+  <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #0d2bff; padding-bottom: 20px;">
+    <h2 style="color: #0d2bff; margin: 0; font-size: 24px;">RAPOR SISWA</h2>
+    <h3 style="margin: 10px 0; font-size: 20px;">SD HATI KUDUS</h3>
+    <p style="margin: 5px 0;">Jl. Kavling Polri No.114-117, Jakarta Barat</p>
+    <p style="margin: 5px 0;">Tahun Ajaran ${r.tahun_ajaran} - Semester ${r.semester}</p>
+  </div>
+
+  <table style="width: 100%; margin-bottom: 30px; border: none;">
+    <tr style="background: none;">
+      <td style="border: none; width: 150px; padding: 8px 0;"><strong>Nama Siswa</strong></td>
+      <td style="border: none; padding: 8px 0;">: ${namaSiswa}</td>
+      <td style="border: none; width: 150px; padding: 8px 0;"><strong>Kelas</strong></td>
+      <td style="border: none; padding: 8px 0;">: ${kelas}</td>
+    </tr>
+    <tr style="background: none;">
+      <td style="border: none; padding: 8px 0;"><strong>Semester</strong></td>
+      <td style="border: none; padding: 8px 0;">: ${r.semester}</td>
+      <td style="border: none; padding: 8px 0;"><strong>Tahun Ajaran</strong></td>
+      <td style="border: none; padding: 8px 0;">: ${r.tahun_ajaran}</td>
+    </tr>
+  </table>
+
+  <h4 style="margin: 20px 0 15px 0; color: #0d2bff;">A. Nilai Akademik</h4>
+  ${
+    nilaiSemester.length > 0
+      ? `<div style="overflow-x: auto;">
+          <table style="width: 100%; border-collapse: collapse; min-width: 800px;">
+          <thead>
+            <tr style="background: #0d2bff;">
+              <th style="border: 1px solid #0d2bff; padding: 12px; text-align: center; color: white;">No</th>
+              <th style="border: 1px solid #0d2bff; padding: 12px; text-align: center; color: white;">Mata Pelajaran</th>
+              <th style="border: 1px solid #0d2bff; padding: 12px; text-align: center; color: white;">UH1</th>
+              <th style="border: 1px solid #0d2bff; padding: 12px; text-align: center; color: white;">UH2</th>
+              <th style="border: 1px solid #0d2bff; padding: 12px; text-align: center; color: white;">UH3</th>
+              <th style="border: 1px solid #0d2bff; padding: 12px; text-align: center; color: white;">UH4</th>
+              <th style="border: 1px solid #0d2bff; padding: 12px; text-align: center; color: white;">UTS</th>
+              <th style="border: 1px solid #0d2bff; padding: 12px; text-align: center; color: white;">UAS</th>
+              <th style="border: 1px solid #0d2bff; padding: 12px; text-align: center; color: white;">Rata-rata</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${nilaiSemester
+              .map((n, idx) => {
+                let uh1 = '-',
+                  uh2 = '-',
+                  uh3 = '-',
+                  uh4 = '-',
+                  uts = '-',
+                  uas = '-';
+
+                if (n.keterangan) {
+                  const parts = n.keterangan.split('|');
+                  parts.forEach((part) => {
+                    if (part.startsWith('uh1:')) uh1 = part.split(':')[1] || '-';
+                    if (part.startsWith('uh2:')) uh2 = part.split(':')[1] || '-';
+                    if (part.startsWith('uh3:')) uh3 = part.split(':')[1] || '-';
+                    if (part.startsWith('uh4:')) uh4 = part.split(':')[1] || '-';
+                    if (part.startsWith('uts:')) uts = part.split(':')[1] || '-';
+                    if (part.startsWith('uas:')) uas = part.split(':')[1] || '-';
+                  });
+                }
+
+                return `
+                  <tr style="background: ${idx % 2 === 0 ? '#f8fafc' : 'white'};">
+                    <td style="border: 1px solid #e2e8f0; padding: 10px; text-align: center;">${idx + 1}</td>
+                    <td style="border: 1px solid #e2e8f0; padding: 10px;"><strong>${n.nama_pelajaran}</strong></td>
+                    <td style="border: 1px solid #e2e8f0; padding: 10px; text-align: center;">${uh1}</td>
+                    <td style="border: 1px solid #e2e8f0; padding: 10px; text-align: center;">${uh2}</td>
+                    <td style="border: 1px solid #e2e8f0; padding: 10px; text-align: center;">${uh3}</td>
+                    <td style="border: 1px solid #e2e8f0; padding: 10px; text-align: center;">${uh4}</td>
+                    <td style="border: 1px solid #e2e8f0; padding: 10px; text-align: center;">${uts}</td>
+                    <td style="border: 1px solid #e2e8f0; padding: 10px; text-align: center;">${uas}</td>
+                    <td style="border: 1px solid #e2e8f0; padding: 10px; text-align: center;"><strong style="color: #0d2bff; font-size: 1.1em;">${n.nilai}</strong></td>
+                  </tr>
+                `;
+              })
+              .join('')}
+          </tbody>
+        </table>
+        </div>`
+      : '<p style="color: #666; padding: 20px; background: #f8fafc; border-radius: 8px;">Belum ada nilai</p>'
+  }
+
+        <h4 style="margin: 30px 0 15px 0; color: #0d2bff;">B. Catatan Wali Kelas</h4>
+        <div style="border: 2px solid #e2e8f0; padding: 20px; border-radius: 8px; background: #f8fafc; min-height: 100px;">
+          ${cleanKomentar || '<em style="color:#999;">Belum ada komentar</em>'}
+        </div>
+
+        <h4 style="margin: 30px 0 15px 0; color: #0d2bff;">C. Status Kenaikan Kelas</h4>
+        <p style="font-size: 18px; font-weight: bold; margin-top: 10px;">
+          ${
+            statusNaik
+              ? '<span style="color: green;">Naik Kelas ✅</span>'
+              : '<span style="color: red;">❌ Tidak Naik Kelas</span>'
+          }
+        </p>
+      </div>
+    `;
+          });
+
+          const content = `
+    <div style="max-height: 75vh; overflow-y: auto; background:#f1f5f9; padding:15px;">
+      ${raporHTML}
+    </div>
+    <div style="margin-top: 20px; text-align:center;">
+      <button class="btn btn-secondary" onclick="closeModal()">Tutup</button>
+    </div>
+  `;
+
+          showModal(`Preview Rapor - ${namaSiswa}`, content);
+        } catch (error) {
+          console.error('Preview rapor error:', error);
+          alert('Gagal memuat preview: ' + error.message);
+        }
+      }
+
+      async function saveNilai(event) {
+        event.preventDefault();
+
+        const siswa_id = document.getElementById('nilai-siswa').value;
+        const pelajaran_id = document.getElementById('nilai-pelajaran').value;
+        const nilai = document.getElementById('nilai-angka').value;
+        const semester = document.getElementById('nilai-semester').value;
+        const tahun_ajaran_id = document.getElementById('nilai-tahun-ajaran').value;
+        const keterangan = document.getElementById('nilai-keterangan').value;
+
+        if (!tahun_ajaran_id) {
+          alert('Tahun ajaran aktif tidak ditemukan. Harap hubungi admin.');
+          return;
+        }
+
+        try {
+          // âœ… PAKAI ENDPOINT KHUSUS NILAI INDIVIDUAL
+          const response = await fetch(`${api}/report/nilai-individual`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              siswa_id: parseInt(siswa_id),
+              pelajaran_id: parseInt(pelajaran_id),
+              nilai: parseFloat(nilai),
+              semester: semester.toString(),
+              tahun_ajaran_id: parseInt(tahun_ajaran_id),
+              tipe_nilai: 'manual', // âœ… Tandai sebagai manual input
+            }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            alert('Nilai berhasil disimpan!');
+            closeModal();
+            loadPage('nilai');
+          } else {
+            alert(data.error || 'Gagal menyimpan');
+          }
+        } catch (error) {
+          alert('Terjadi kesalahan: ' + error.message);
+        }
+      }
+
+      async function loadNilaiManagement(main) {
+        main.innerHTML = '<div class="loading">Loading...</div>';
+
+        try {
+          // âœ… PAKAI ENDPOINT KHUSUS NILAI INDIVIDUAL
+          const response = await fetch(`${api}/report/nilai-individual`);
+          if (!response.ok) throw new Error('Failed to fetch individual nilai');
+
+          let allIndividualNilai = await response.json();
+
+          allIndividualNilai = allIndividualNilai.filter(
+            (n) => !n.keterangan || n.keterangan === 'manual_input'
+          );
+
+          // Filter by class if needed
+          if (user.role === 'class_account' && user.kelas) {
+            allIndividualNilai = allIndividualNilai.filter((n) => n.kelas_nama === user.kelas);
+          }
+
+          main.innerHTML = `
+      <div class="content-body">
+        <div class="flex-between" style="margin-bottom: 20px;">
+          <h2 class="section-title" style="margin: 0;">Manajemen Nilai ${user.role === 'class_account' ? `Kelas ${user.kelas}` : ''}</h2>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn btn-secondary" onclick="exportNilaiPDF()">Export PDF</button>
+            <button class="btn btn-success" onclick="showAddNilai()">Input Nilai Baru</button>
+          </div>
+        </div>
+
+        <!-- Filter Search -->
+        <div style="margin-bottom: 20px; display: flex; gap: 10px;">
+          <input type="text" id="search-nilai" placeholder="Cari nama siswa..." 
+                 style="flex: 1; padding: 10px; border: 2px solid #d1d5db; border-radius: 8px;"
+                 oninput="filterNilai()">
+          <select id="filter-nilai-kelas" style="padding: 10px; border: 2px solid #d1d5db; border-radius: 8px;" onchange="filterNilai()">
+            <option value="">Semua Kelas</option>
+            ${[...new Set(allIndividualNilai.map((n) => n.kelas_nama))]
+              .filter((k) => k)
+              .sort()
+              .map((k) => `<option value="${k}">${k}</option>`)
+              .join('')}
+          </select>
+          <select id="filter-nilai-semester" style="padding: 10px; border: 2px solid #d1d5db; border-radius: 8px;" onchange="filterNilai()">
+            <option value="">Semua Semester</option>
+            <option value="1">Semester 1</option>
+            <option value="2">Semester 2</option>
+          </select>
+        </div>
+
+        <table id="nilai-table">
+          <thead>
+            <tr>
+              <th>Nama Siswa</th>
+              <th>Kelas</th>
+              <th>Mata Pelajaran</th>
+              <th>Nilai</th>
+              <th>Semester</th>
+              <th>Tahun Ajaran</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="nilai-tbody">
+            ${
+              allIndividualNilai.length > 0
+                ? allIndividualNilai
+                    .map(
+                      (nilai) => `
+              <tr data-nama="${nilai.nama_siswa.toLowerCase()}" data-kelas="${nilai.kelas_nama || ''}" data-semester="${nilai.semester}">
+                <td>${nilai.nama_siswa}</td>
+                <td>${nilai.kelas_nama || '-'}</td>
+                <td>${nilai.nama_pelajaran}</td>
+                <td><strong style="color: #0d2bff; font-size: 1.1rem;">${nilai.nilai}</strong></td>
+                <td>Semester ${nilai.semester}</td>
+                <td>${nilai.tahun_ajaran}</td>
+                <td class="action-buttons">
+                  <button class="btn btn-danger btn-sm" onclick="deleteNilaiManual(${nilai.id})">Hapus</button>
+                </td>
+              </tr>
+            `
+                    )
+                    .join('')
+                : '<tr><td colspan="7" style="text-align:center; padding: 40px; color: #64748b;">Belum ada data nilai</td></tr>'
+            }
+          </tbody>
+        </table>
+      </div>
+    `;
+
+          window.allNilaiData = allIndividualNilai;
+        } catch (error) {
+          console.error('Load nilai error:', error);
+          main.innerHTML = `<div class="error">Gagal memuat nilai: ${error.message}</div>`;
+        }
+      }
+
+      async function deleteNilaiManual(nilaiId) {
+        if (!confirm('Hapus nilai manual ini?')) return;
+
+        try {
+          const response = await fetch(`${api}/report/nilai-individual/${nilaiId}`, {
+            method: 'DELETE',
+          });
+
+          if (response.ok) {
+            alert('Nilai manual berhasil dihapus!');
+            loadPage('nilai');
+          } else {
+            const data = await response.json();
+            alert('❌ Gagal menghapus: ' + (data.error || 'Unknown error'));
+          }
+        } catch (error) {
+          console.error('Delete error:', error);
+          alert('❌ Terjadi kesalahan: ' + error.message);
+        }
+      }
+
+      function filterNilai() {
+        const searchTerm = document.getElementById('search-nilai').value.toLowerCase();
+        const filterKelas = document.getElementById('filter-nilai-kelas').value;
+        const filterSemester = document.getElementById('filter-nilai-semester').value;
+
+        const rows = document.querySelectorAll('#nilai-tbody tr');
+
+        rows.forEach((row) => {
+          if (!row.dataset.nama) return;
+
+          const nama = row.dataset.nama;
+          const kelas = row.dataset.kelas;
+          const semester = row.dataset.semester;
+
+          const matchSearch = nama.includes(searchTerm);
+          const matchKelas = !filterKelas || kelas === filterKelas;
+          const matchSemester = !filterSemester || semester === filterSemester;
+
+          if (matchSearch && matchKelas && matchSemester) {
+            row.style.display = '';
+          } else {
+            row.style.display = 'none';
+          }
+        });
+      }
+
+      async function exportNilaiPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        doc.setFontSize(18);
+        doc.text('Laporan Nilai Siswa', 14, 20);
+        doc.setFontSize(11);
+        doc.text(`Tanggal: ${new Date().toLocaleDateString('id-ID')}`, 14, 28);
+
+        const visibleRows = Array.from(document.querySelectorAll('#nilai-tbody tr')).filter(
+          (row) => row.style.display !== 'none' && row.dataset.nama
+        );
+
+        const tableData = visibleRows.map((row) => {
+          const cells = row.querySelectorAll('td');
+          return [
+            cells[0].textContent,
+            cells[1].textContent,
+            cells[2].textContent,
+            cells[3].textContent,
+            cells[4].textContent,
+            cells[5].textContent,
+          ];
+        });
+
+        doc.autoTable({
+          startY: 35,
+          head: [['Nama', 'Kelas', 'Pelajaran', 'Nilai', 'Semester', 'TA']],
+          body: tableData,
+          styles: { fontSize: 8 },
+          headStyles: { fillColor: [13, 43, 255] },
+        });
+
+        doc.save(`Laporan-Nilai-${new Date().toISOString().split('T')[0]}.pdf`);
+      }
+
+      async function showManageNilai(siswaId, namaSiswa, semester) {
+        try {
+          const studentsResponse = await fetch(`${api}/students`);
+          const allStudents = await studentsResponse.json();
+
+          let students = allStudents;
+          if (user.role === 'class_account' && user.kelas) {
+            students = allStudents.filter((s) => s.kelas === user.kelas);
+          }
+
+          const [pelajaranResponse, tahunAjaranResponse, nilaiResponse] = await Promise.all([
+            fetch(`${api}/report/pelajaran`),
+            fetch(`${api}/tahun-ajaran/active`),
+            fetch(`${api}/report/nilai/${siswaId}`),
+          ]);
+
+          const tahunAjaran = await tahunAjaranResponse.json();
+          const pelajaran = await pelajaranResponse.json();
+          const allNilai = await nilaiResponse.json();
+
+          const nilaiSemester = allNilai.filter((n) => {
+            const matchSemester = n.semester == semester;
+            const matchTahunAjaran =
+              n.tahun_ajaran === `${tahunAjaran.tahun_mulai}/${tahunAjaran.tahun_akhir}`;
+
+            const isRaporNilai =
+              n.keterangan &&
+              (n.keterangan.includes('uh1:') ||
+                n.keterangan.includes('uh2:') ||
+                n.keterangan.includes('uh3:') ||
+                n.keterangan.includes('uh4:') ||
+                n.keterangan.includes('uts:') ||
+                n.keterangan.includes('uas:'));
+
+            return matchSemester && matchTahunAjaran && isRaporNilai;
+          });
+
+          const isSem1 = semester == 1;
+
+          let tableHTML = `
+<div style="background: #e0f2fe; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+  <strong>ℹ️ Format Nilai Semester ${semester}:</strong><br>
+  📝 Rata-rata = (UH1 + UH2 + UH3 + UH4 + UTS + UAS) / 6<br>
+  ℹ️ Rata-rata dihitung otomatis
+</div>
+<div style="max-height: 500px; overflow-y: auto; overflow-x: auto;">
+<table style="margin-top: 20px; width: 100%; min-width: 900px;">
+  <thead>
+    <tr>
+      <th style="min-width: 150px;">Mata Pelajaran</th>
+      <th style="min-width: 80px;">UH1</th>
+      <th style="min-width: 80px;">UH2</th>
+      <th style="min-width: 80px;">UH3</th>
+      <th style="min-width: 80px;">UH4</th>
+      <th style="min-width: 80px;">UTS</th>
+      <th style="min-width: 80px;">UAS</th>
+      <th style="min-width: 80px;">Rata-rata</th>
+      <th style="min-width: 100px;">Aksi</th>
+    </tr>
+  </thead>
+  <tbody>`;
+
+          pelajaran.forEach((p) => {
+            const existingNilai = nilaiSemester.find(
+              (n) => n.nama_pelajaran === p.namapelajaran || n.pelajaranid == p.pelajaranid
+            );
+
+            let uh1 = '',
+              uh2 = '',
+              uh3 = '',
+              uh4 = '',
+              uts = '',
+              uas = '';
+            if (existingNilai && existingNilai.keterangan) {
+              const parts = existingNilai.keterangan.split('|');
+              parts.forEach((part) => {
+                const [key, value] = part.split(':');
+                const cleanKey = key?.trim();
+                const cleanValue = value?.trim() || '';
+
+                if (cleanKey === 'uh1') uh1 = cleanValue;
+                if (cleanKey === 'uh2') uh2 = cleanValue;
+                if (cleanKey === 'uh3') uh3 = cleanValue;
+                if (cleanKey === 'uh4') uh4 = cleanValue;
+                if (cleanKey === 'uts') uts = cleanValue;
+                if (cleanKey === 'uas') uas = cleanValue;
+              });
+            }
+
+            tableHTML += `
+  <tr>
+    <td><strong>${p.namapelajaran}</strong></td>
+    <td>
+      <input type="number" 
+             id="uh1-${p.pelajaranid}" 
+             value="${uh1}" 
+             min="0" 
+             max="100" 
+             placeholder="0-100" 
+             style="width: 70px; padding: 8px;"
+             oninput="calculateAverage6(${p.pelajaranid})">
+    </td>
+    <td>
+      <input type="number" 
+             id="uh2-${p.pelajaranid}" 
+             value="${uh2}" 
+             min="0" 
+             max="100" 
+             placeholder="0-100" 
+             style="width: 70px; padding: 8px;"
+             oninput="calculateAverage6(${p.pelajaranid})">
+    </td>
+    <td>
+      <input type="number" 
+             id="uh3-${p.pelajaranid}" 
+             value="${uh3}" 
+             min="0" 
+             max="100" 
+             placeholder="0-100" 
+             style="width: 70px; padding: 8px;"
+             oninput="calculateAverage6(${p.pelajaranid})">
+    </td>
+    <td>
+      <input type="number" 
+             id="uh4-${p.pelajaranid}" 
+             value="${uh4}" 
+             min="0" 
+             max="100" 
+             placeholder="0-100" 
+             style="width: 70px; padding: 8px;"
+             oninput="calculateAverage6(${p.pelajaranid})">
+    </td>
+    <td>
+      <input type="number" 
+             id="uts-${p.pelajaranid}" 
+             value="${uts}" 
+             min="0" 
+             max="100" 
+             placeholder="0-100" 
+             style="width: 70px; padding: 8px;"
+             oninput="calculateAverage6(${p.pelajaranid})">
+    </td>
+    <td>
+      <input type="number" 
+             id="uas-${p.pelajaranid}" 
+             value="${uas}" 
+             min="0" 
+             max="100" 
+             placeholder="0-100" 
+             style="width: 70px; padding: 8px;"
+             oninput="calculateAverage6(${p.pelajaranid})">
+    </td>
+    <td><strong id="rata-${p.pelajaranid}" style="color: #0d2bff;">${existingNilai ? existingNilai.nilai : '-'}</strong></td>
+    <td>
+      ${existingNilai ? `<button class="btn btn-danger btn-sm" onclick="deleteNilaiFromModal(${existingNilai.id}, ${siswaId}, '${namaSiswa}', ${semester})">Hapus</button>` : ''}
+    </td>
+  </tr>
+`;
+          });
+
+          tableHTML += '</tbody></table></div>';
+
+          const content = `
+    <div>
+      <p><strong>Siswa:</strong> ${namaSiswa}</p>
+      <p><strong>Semester:</strong> ${semester}</p>
+      <p><strong>Tahun Ajaran:</strong> ${tahunAjaran.tahun_mulai}/${tahunAjaran.tahun_akhir}</p>
+      
+      ${tableHTML}
+      
+      <div style="margin-top: 20px;">
+        <button class="btn btn-success" onclick="saveAllNilai(${siswaId}, ${semester}, ${tahunAjaran.id}, ${JSON.stringify(pelajaran).replace(/"/g, '&quot;')})">Simpan Semua Nilai</button>
+        <button class="btn btn-secondary" onclick="closeModal()">Tutup</button>
+      </div>
+    </div>
+  `;
+
+          showModal(`Input Nilai - ${namaSiswa} (Semester ${semester})`, content);
+        } catch (error) {
+          console.error('Load nilai error:', error);
+          alert('Gagal memuat data: ' + error.message);
+        }
+      }
+
+      function calculateAverage6(pelajaranId) {
+        const uh1 = parseFloat(document.getElementById(`uh1-${pelajaranId}`)?.value) || 0;
+        const uh2 = parseFloat(document.getElementById(`uh2-${pelajaranId}`)?.value) || 0;
+        const uh3 = parseFloat(document.getElementById(`uh3-${pelajaranId}`)?.value) || 0;
+        const uh4 = parseFloat(document.getElementById(`uh4-${pelajaranId}`)?.value) || 0;
+        const uts = parseFloat(document.getElementById(`uts-${pelajaranId}`)?.value) || 0;
+        const uas = parseFloat(document.getElementById(`uas-${pelajaranId}`)?.value) || 0;
+
+        const rataSpan = document.getElementById(`rata-${pelajaranId}`);
+        if (!rataSpan) return;
+
+        const filledCount = [uh1, uh2, uh3, uh4, uts, uas].filter((v) => v > 0).length;
+
+        if (filledCount === 6) {
+          // Semua terisi
+          const avg = ((uh1 + uh2 + uh3 + uh4 + uts + uas) / 6).toFixed(2);
+          rataSpan.textContent = avg;
+          rataSpan.style.color = '#0d2bff'; // Biru = lengkap
+        } else if (filledCount > 0) {
+          // Ada yang terisi tapi belum lengkap
+          rataSpan.textContent = '-';
+          rataSpan.style.color = '#ff8c00'; // Orange = belum lengkap
+        } else {
+          // Kosong semua
+          rataSpan.textContent = '-';
+          rataSpan.style.color = '#999';
+        }
+      }
+
+      async function deleteNilaiFromModal(nilaiId, siswaId, namaSiswa, semester) {
+        if (!confirm('Hapus nilai ini?')) return;
+
+        try {
+          const response = await fetch(`${api}/report/nilai/${nilaiId}`, {
+            method: 'DELETE',
+          });
+
+          if (response.ok) {
+            alert('Nilai berhasil dihapus!');
+            showManageNilai(siswaId, namaSiswa, semester);
+          } else {
+            const data = await response.json();
+            alert(' Gagal menghapus: ' + (data.error || 'Unknown error'));
+          }
+        } catch (error) {
+          console.error('Delete error:', error);
+          alert('Terjadi kesalahan: ' + error.message);
+        }
+      }
+
+      async function saveAllNilai(siswaId, semester, tahunAjaranId, pelajaranList) {
+        const pelajaran =
+          typeof pelajaranList === 'string' ? JSON.parse(pelajaranList) : pelajaranList;
+
+        let successCount = 0;
+        let errorCount = 0;
+
+        for (const p of pelajaran) {
+          const uh1 = document.getElementById(`uh1-${p.pelajaranid}`)?.value;
+          const uh2 = document.getElementById(`uh2-${p.pelajaranid}`)?.value;
+          const uh3 = document.getElementById(`uh3-${p.pelajaranid}`)?.value;
+          const uh4 = document.getElementById(`uh4-${p.pelajaranid}`)?.value;
+          const uts = document.getElementById(`uts-${p.pelajaranid}`)?.value;
+          const uas = document.getElementById(`uas-${p.pelajaranid}`)?.value;
+
+          // Hanya simpan jika SEMUA 6 nilai terisi
+          if (uh1 && uh2 && uh3 && uh4 && uts && uas) {
+            const nilai1 = parseFloat(uh1) || 0;
+            const nilai2 = parseFloat(uh2) || 0;
+            const nilai3 = parseFloat(uh3) || 0;
+            const nilai4 = parseFloat(uh4) || 0;
+            const nilaiUts = parseFloat(uts) || 0;
+            const nilaiUas = parseFloat(uas) || 0;
+
+            const nilaiRata = (
+              (nilai1 + nilai2 + nilai3 + nilai4 + nilaiUts + nilaiUas) /
+              6
+            ).toFixed(2);
+            const keterangan = `uh1:${uh1}|uh2:${uh2}|uh3:${uh3}|uh4:${uh4}|uts:${uts}|uas:${uas}`;
+
+            try {
+              const response = await fetch(`${api}/report/rapor/nilai`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  siswa_id: siswaId,
+                  pelajaran_id: p.pelajaranid,
+                  nilai_rata: parseFloat(nilaiRata),
+                  semester: semester.toString(),
+                  tahun_ajaran_id: tahunAjaranId,
+                  keterangan: keterangan,
+                }),
+              });
+
+              if (response.ok) successCount++;
+              else errorCount++;
+            } catch (error) {
+              console.error(`Error saving ${p.namapelajaran}:`, error);
+              errorCount++;
+            }
+          }
+        }
+
+        if (successCount > 0) {
+          alert(`✅ Berhasil menyimpan ${successCount} nilai!`);
+          closeModal();
+          loadPage('rapor');
+        } else if (errorCount > 0) {
+          alert(`❌ Gagal menyimpan ${errorCount} nilai`);
+        } else {
+          alert('⚠️ Tidak ada nilai yang diinput lengkap (harus semua 6 kolom terisi)');
+        }
+      }
+
+      // Ganti function showAddRapor menjadi showAddNilai
+      async function showAddNilai() {
+        try {
+          const [studentsResponse, pelajaranResponse, tahunAjaranResponse] = await Promise.all([
+            fetch(`${api}/students`),
+            fetch(`${api}/report/pelajaran`),
+            fetch(`${api}/tahun-ajaran/active`),
+          ]);
+
+          const students = await studentsResponse.json();
+          const pelajaran = await pelajaranResponse.json();
+          const tahunAjaran = await tahunAjaranResponse.json();
+
+          const content = `
+      <form onsubmit="saveNilai(event)">
+        <div class="form-group">
+          <label>Pilih Siswa</label>
+          <select id="nilai-siswa" required>
+            <option value="">-- Pilih Siswa --</option>
+            ${students.map((s) => `<option value="${s.id}">${s.nama} (${s.kelas})</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Mata Pelajaran</label>
+          <select id="nilai-pelajaran" required>
+            <option value="">-- Pilih Mata Pelajaran --</option>
+            ${pelajaran.map((p) => `<option value="${p.pelajaranid}">${p.namapelajaran}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Nilai (0-100)</label>
+          <input type="number" id="nilai-angka" min="0" max="100" step="0.01" required>
+        </div>
+        <div class="form-group">
+          <label>Semester</label>
+          <select id="nilai-semester" required>
+            <option value="1">Semester 1</option>
+            <option value="2">Semester 2</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Tahun Ajaran</label>
+          <input type="text" id="nilai-tahun-ajaran" value="${tahunAjaran ? tahunAjaran.id : ''}" readonly style="background: #f3f4f6;">
+          <small style="color: #666;">${tahunAjaran ? `${tahunAjaran.tahun_mulai}/${tahunAjaran.tahun_akhir}` : 'Belum ada tahun ajaran aktif'}</small>
+        </div>
+        <div class="form-group">
+          <label>Keterangan (opsional)</label>
+          <textarea id="nilai-keterangan" placeholder="Catatan tambahan..."></textarea>
+        </div>
+        <div style="margin-top: 20px;">
+          <button type="submit" class="btn btn-success">Simpan</button>
+          <button type="button" class="btn btn-secondary" onclick="closeModal()">Batal</button>
+        </div>
+      </form>
+    `;
+          showModal('Input Nilai', content);
+        } catch (error) {
+          alert('Gagal memuat data: ' + error.message);
+        }
+      }
+
+      // Ganti function saveRapor menjadi saveNilai
+      async function saveNilai(event) {
+        event.preventDefault();
+
+        const siswa_id = document.getElementById('nilai-siswa').value;
+        const pelajaran_id = document.getElementById('nilai-pelajaran').value;
+        const nilai = document.getElementById('nilai-angka').value;
+        const semester = document.getElementById('nilai-semester').value;
+        const tahun_ajaran_id = document.getElementById('nilai-tahun-ajaran').value;
+        const keterangan = document.getElementById('nilai-keterangan').value;
+        const tipe_nilai = 'manual';
+
+        if (!tahun_ajaran_id) {
+          alert('Tahun ajaran aktif tidak ditemukan. Harap hubungi admin.');
+          return;
+        }
+
+        try {
+          const response = await fetch(`${api}/report/nilai-individual`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              siswa_id,
+              pelajaran_id,
+              nilai,
+              semester,
+              tahun_ajaran_id,
+              tipe_nilai,
+              keterangan: 'manual_input',
+            }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+            alert('Nilai berhasil disimpan!');
+            closeModal();
+            loadPage('nilai');
+          } else {
+            alert(data.error || 'Gagal menyimpan');
+          }
+        } catch (error) {
+          alert('Terjadi kesalahan: ' + error.message);
+        }
+      }
+
+      async function editNilai(nilaiId) {
+        try {
+          // Fetch data nilai
+          const response = await fetch(`${api}/students`);
+          const students = await response.json();
+
+          let targetNilai = null;
+          let studentData = null;
+
+          for (const student of students) {
+            const nilaiResponse = await fetch(`${api}/report/nilai/${student.id}`);
+            const nilaiList = await nilaiResponse.json();
+            targetNilai = nilaiList.find((n) => n.id === nilaiId);
+            if (targetNilai) {
+              targetNilai.siswa_id = student.id;
+              studentData = student;
+              break;
+            }
+          }
+
+          if (!targetNilai || !studentData) throw new Error('Nilai tidak ditemukan');
+
+          const [pelajaranResponse, tahunAjaranResponse] = await Promise.all([
+            fetch(`${api}/report/pelajaran`),
+            fetch(`${api}/tahun-ajaran`),
+          ]);
+
+          const pelajaran = await pelajaranResponse.json();
+          const tahunAjaranList = await tahunAjaranResponse.json();
+
+          const content = `
+      <form onsubmit="updateNilai(event, ${nilaiId})">
+        <div class="form-group">
+          <label>Siswa</label>
+          <input type="text" value="${studentData.nama} (${studentData.kelas})" readonly style="background: #f3f4f6;">
+        </div>
+        <div class="form-group">
+          <label>Mata Pelajaran</label>
+          <input type="text" value="${targetNilai.nama_pelajaran}" readonly style="background: #f3f4f6;">
+        </div>
+        <div class="form-group">
+          <label>Nilai (0-100)</label>
+          <input type="number" id="edit-nilai-angka" min="0" max="100" step="0.01" value="${targetNilai.nilai}" required>
+        </div>
+        <div class="form-group">
+          <label>Semester</label>
+          <select id="edit-nilai-semester" required>
+            <option value="1" ${targetNilai.semester == 1 ? 'selected' : ''}>Semester 1</option>
+            <option value="2" ${targetNilai.semester == 2 ? 'selected' : ''}>Semester 2</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Keterangan</label>
+          <textarea id="edit-nilai-keterangan">${targetNilai.keterangan || ''}</textarea>
+        </div>
+        <input type="hidden" id="edit-nilai-siswa-id" value="${targetNilai.siswa_id}">
+        <div style="margin-top: 20px;">
+          <button type="submit" class="btn btn-success">Update</button>
+          <button type="button" class="btn btn-secondary" onclick="closeModal()">Batal</button>
+        </div>
+      </form>
+    `;
+          showModal('Edit Nilai', content);
+        } catch (error) {
+          alert('Gagal memuat data: ' + error.message);
+        }
+      }
+
+      // Tambahkan function updateNilai
+      async function updateNilai(event, nilaiId) {
+        event.preventDefault();
+
+        const nilai = document.getElementById('edit-nilai-angka').value;
+        const keterangan = document.getElementById('edit-nilai-keterangan').value;
+
+        try {
+          const response = await fetch(`${api}/report/nilai/${nilaiId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nilai, keterangan }),
+          });
+
+          if (response.ok) {
+            alert('Nilai berhasil diupdate!');
+            closeModal();
+            loadPage('nilai');
+          } else {
+            const data = await response.json();
+            alert(data.error || 'Gagal mengupdate');
+          }
+        } catch (error) {
+          alert('Terjadi kesalahan: ' + error.message);
+        }
+      }
+
+      async function deleteNilai(nilaiId) {
+        if (!confirm('Hapus nilai ini?')) return;
+
+        try {
+          const response = await fetch(`${api}/report/nilai/${nilaiId}`, {
+            method: 'DELETE',
+          });
+
+          if (response.ok) {
+            alert('Nilai berhasil dihapus!');
+
+            const mainContent = document.getElementById('mainContent');
+            if (mainContent.innerHTML.includes('Manajemen Nilai')) {
+              loadPage('nilai'); // Reload halaman nilai
+            } else {
+              loadPage('rapor'); // Reload halaman rapor
+            }
+          } else {
+            const data = await response.json();
+            alert('❌ Gagal menghapus: ' + (data.error || 'Unknown error'));
+          }
+        } catch (error) {
+          console.error('Delete error:', error);
+          alert('❌ Terjadi kesalahan: ' + error.message);
+        }
+      }
+
+      async function loadChatManagement(main) {
+        main.innerHTML = '<div class="loading">Loading...</div>';
+
+        try {
+          const response = await fetch(`${api}/chatbot/pending`);
+          if (!response.ok) throw new Error('Failed to fetch pending chats');
+
+          const pendingChats = await response.json();
+
+          main.innerHTML = `
+      <div class="content-body">
+        <h2 class="section-title">💬 Chat dengan Siswa</h2>
+        
+        ${
+          pendingChats.length === 0
+            ? '<p style="padding: 40px; text-align: center; color: #64748b;">Belum ada pesan dari siswa</p>'
+            : `
+        <div style="display: grid; gap: 20px;">
+          ${pendingChats
+            .map(
+              (chat) => `
+            <div style="background: #f8fafc; padding: 20px; border-radius: 10px; border-left: 4px solid #0d2bff;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <div>
+                  <strong style="font-size: 1.1rem;">${chat.nama_siswa}</strong>
+                  <span style="color: #64748b; margin-left: 10px;">Kelas ${chat.kelas}</span>
+                </div>
+                <span style="color: #64748b; font-size: 0.9rem;">${new Date(chat.waktu).toLocaleString('id-ID')}</span>
+              </div>
+              <p style="color: #374151; margin: 15px 0;">${chat.pesan}</p>
+              <button class="btn btn-primary btn-sm" onclick="openChatWithStudent(${chat.siswa_id}, '${chat.nama_siswa}', '${chat.kelas}')">Balas Chat</button>
+            </div>
+          `
+            )
+            .join('')}
+        </div>
+        `
+        }
+      </div>
+    `;
+        } catch (error) {
+          console.error('Load chat error:', error);
+          main.innerHTML = `<div class="error">Gagal memuat chat: ${error.message}</div>`;
+        }
+      }
+
+      // Function untuk buka chat dengan siswa tertentu
+      async function openChatWithStudent(siswaId, namaSiswa, kelas) {
+        try {
+          const response = await fetch(`${api}/chatbot/guru/history/${siswaId}`);
+          if (!response.ok) throw new Error('Failed to fetch chat history');
+
+          const history = await response.json();
+
+          let chatHTML =
+            '<div style="max-height: 400px; overflow-y: auto; padding: 20px; background: #f8fafc; border-radius: 8px; margin-bottom: 20px;">';
+
+          history.forEach((msg) => {
+            const isFromGuru = msg.guru_id !== null;
+
+            if (isFromGuru) {
+              // Pesan dari guru (biru)
+              chatHTML += `
+      <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
+        <div style="background: #0d2bff; color: white; padding: 12px 16px; border-radius: 12px; max-width: 70%;">
+          <div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 5px;">
+            👨‍🏫 ${msg.nama_guru} 🗓️ ${new Date(msg.waktu).toLocaleTimeString('id-ID')}
+          </div>
+          <div>${msg.pesan}</div>
+        </div>
+      </div>
+    `;
+            } else {
+              // Pesan dari siswa (abu-abu)
+              chatHTML += `
+      <div style="display: flex; justify-content: flex-start; margin-bottom: 15px;">
+        <div style="background: #e0e7ff; color: #1f2937; padding: 12px 16px; border-radius: 12px; max-width: 70%;">
+          <div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 5px;">
+            👤 ${namaSiswa} 🗓️ ${new Date(msg.waktu).toLocaleTimeString('id-ID')}
+          </div>
+          <div>${msg.pesan}</div>
+        </div>
+      </div>
+    `;
+            }
+          });
+
+          chatHTML += '</div>';
+
+          const content = `
+      <div>
+        <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+          <strong style="font-size: 1.1rem;">${namaSiswa}</strong>
+          <span style="color: #64748b; margin-left: 10px;">Kelas ${kelas}</span>
+        </div>
+        
+        ${chatHTML}
+        
+        <form onsubmit="sendReplyToStudent(event, ${siswaId}, '${namaSiswa}')">
+          <div class="form-group">
+            <label>Balas Pesan</label>
+            <textarea id="reply-message" rows="4" placeholder="Ketik balasan..." required></textarea>
+          </div>
+          <div style="margin-top: 20px;">
+            <button type="submit" class="btn btn-success">Kirim Balasan</button>
+            <button type="button" class="btn btn-secondary" onclick="closeModal()">Tutup</button>
+          </div>
+        </form>
+      </div>
+    `;
+
+          showModal(`Chat dengan ${namaSiswa}`, content);
+
+          // Auto scroll ke bawah
+          setTimeout(() => {
+            const chatContainer = document.querySelector('#modal-body > div > div:nth-child(2)');
+            if (chatContainer) {
+              chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+          }, 100);
+        } catch (error) {
+          alert('Gagal memuat chat: ' + error.message);
+        }
+      }
+
+      // Function untuk kirim balasan ke siswa
+      async function sendReplyToStudent(event, siswaId, namaSiswa) {
+        event.preventDefault();
+
+        const message = document.getElementById('reply-message').value.trim();
+        if (!message) return;
+
+        try {
+          const response = await fetch(`${api}/chatbot/reply`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              siswa_id: siswaId,
+              guru_id: user.id,
+              pesan: message,
+            }),
+          });
+
+          if (response.ok) {
+            alert('Balasan berhasil dikirim!');
+            closeModal();
+            loadPage('chat');
+          } else {
+            alert('Gagal mengirim balasan');
+          }
+        } catch (error) {
+          alert('Terjadi kesalahan: ' + error.message);
+        }
+      }
+
+      // Utility Functions
+      function changePage(type, page) {
+        currentPage[type] = page;
+        if (type === 'news') loadPage('news');
+        else if (type === 'students') loadPage('students-info');
+        else if (type === 'gallery') loadPage('gallery');
+        else if (type === 'rapor') loadPage('rapor');
+        else if (type === 'nilai') loadPage('nilai');
+      }
+
+      function filterByClass(kelas) {
+        alert(`Filter by class: ${kelas}`);
+        // Implementation for filtering would go here
+      }
+
+      function logout() {
+        localStorage.removeItem('user');
+        alert('Anda telah logout');
+        window.location.href = '/index.html';
+      }
+
+      // ===== VALIDASI NAMA (HANYA HURUF) =====
+      function validateNameInput(inputId) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+
+        // Hapus angka dan karakter khusus, hanya izinkan huruf dan spasi
+        input.value = input.value.replace(/[^a-zA-Z\s]/g, '');
+
+        // Feedback visual jika ada input tidak valid
+        if (input.value !== input.value.replace(/[^a-zA-Z\s]/g, '')) {
+          input.style.borderColor = '#ef4444';
+          setTimeout(() => {
+            input.style.borderColor = '#d1d5db';
+          }, 1000);
+        }
+      }
+
+      // Event listener untuk semua input nama
+      document.addEventListener('DOMContentLoaded', function () {
+        // Tambahkan listener ke semua input yang ID-nya mengandung 'nama'
+        const nameInputs = document.querySelectorAll('input[id*="nama"], input[id*="name"]');
+        nameInputs.forEach((input) => {
+          input.addEventListener('input', function () {
+            this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,17 @@
+# Folder uploads
+uploads/
+!uploads/.gitkeep
+
+# Jangan track public/uploads (kalau muncul lagi)
+public/uploads/
+
+# Node modules
+node_modules/
+
+# Environment variables
+.env
+.env.local
+
+# Logs
+*.log
+npm-debug.log*

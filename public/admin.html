@@ -1,0 +1,1986 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <title>Portal Admin - SHK</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: 'Segoe UI', sans-serif;
+        background: #f5f7fa;
+        display: flex;
+        min-height: 100vh;
+      }
+      .sidebar {
+        width: 280px;
+        background: linear-gradient(180deg, #0d2bff, #0d2b52);
+        color: white;
+        position: fixed;
+        height: 100vh;
+        overflow-y: auto;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+      }
+      .sidebar-menu {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px 0;
+      }
+      .user-info {
+        margin-top: auto;
+        padding: 25px 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(0, 0, 0, 0.2);
+      }
+      .logo {
+        padding: 30px 20px;
+        text-align: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .logo h1 {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+      .menu-item {
+        padding: 15px 25px;
+        cursor: pointer;
+        transition: all 0.3s;
+        border-left: 4px solid transparent;
+        display: flex;
+        align-items: center;
+        font-weight: 500;
+        margin: 5px 0;
+        gap: 10px;
+      }
+      .menu-item:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-left-color: #fff;
+      }
+      .menu-item.active {
+        background: rgba(255, 255, 255, 0.2);
+        border-left-color: #fff;
+      }
+      .logout-btn {
+        background: #ef4444;
+        color: white;
+        border: none;
+        padding: 12px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        width: 100%;
+      }
+      .main-content {
+        margin-left: 280px;
+        flex: 1;
+        padding: 30px;
+        overflow-y: auto;
+      }
+      .content-body {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+        margin-bottom: 25px;
+      }
+      .section-title {
+        font-size: 1.5rem;
+        color: #1f2937;
+        margin-bottom: 25px;
+        padding-bottom: 12px;
+        border-bottom: 2px solid #0d2bff;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      table th {
+        background: #0d2bff;
+        color: white;
+        padding: 14px;
+        text-align: left;
+      }
+      table td {
+        padding: 14px;
+        border-bottom: 1px solid #e2e8f0;
+      }
+      table tr:nth-child(even) {
+        background: #f8fafc;
+      }
+      .form-group {
+        margin-bottom: 20px;
+      }
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #374151;
+      }
+      .form-group input,
+      .form-group select {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #d1d5db;
+        border-radius: 8px;
+      }
+      .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 500;
+      }
+      .btn-primary {
+        background: #0d2bff;
+        color: white;
+      }
+      .btn-success {
+        background: #10b981;
+        color: white;
+      }
+      .btn-danger {
+        background: #ef4444;
+        color: white;
+      }
+      .btn-secondary {
+        background: #6b7280;
+        color: white;
+      }
+      .btn-sm {
+        padding: 8px 16px;
+        font-size: 0.875rem;
+      }
+      .action-buttons {
+        display: flex;
+        gap: 8px;
+      }
+      .grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 25px;
+      }
+      .grid-4 {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+      }
+      .card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 25px;
+      }
+      .stat-card {
+        text-align: center;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+      }
+      .stat-number {
+        font-size: 2.8rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 2000;
+      }
+      .modal-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 35px;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 600px;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #e2e8f0;
+      }
+      .close-modal {
+        background: none;
+        border: none;
+        font-size: 1.8rem;
+        cursor: pointer;
+        color: #6b7280;
+      }
+      .info-box {
+        background: #f0f9ff;
+        border: 1px solid #bae6fd;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 25px;
+        color: #0369a1;
+      }
+      .password-toggle {
+        position: relative;
+      }
+      .password-toggle input {
+        padding-right: 40px;
+      }
+      .password-toggle-btn {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 1.2rem;
+        color: #6b7280;
+        padding: 5px;
+      }
+      .password-toggle-btn:hover {
+        color: #0d2bff;
+      }
+      .search-box {
+        margin-bottom: 20px;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+      .search-box input {
+        flex: 1;
+        padding: 12px;
+        border: 2px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 1rem;
+      }
+      .search-box input:focus {
+        outline: none;
+        border-color: #0d2bff;
+      }
+
+      @media (max-width: 1024px) {
+        .sidebar {
+          width: 250px;
+        }
+        .main-content {
+          margin-left: 250px;
+        }
+        .grid-4 {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      @media (max-width: 768px) {
+        .sidebar {
+          position: fixed;
+          left: -280px;
+          transition: left 0.3s ease;
+          z-index: 2000;
+        }
+
+        .sidebar.open {
+          left: 0;
+        }
+
+        .main-content {
+          margin-left: 0;
+          padding: 15px;
+        }
+
+        .grid-3,
+        .grid-4 {
+          grid-template-columns: 1fr;
+        }
+
+        table {
+          font-size: 0.85rem;
+        }
+
+        table th,
+        table td {
+          padding: 8px;
+        }
+
+        .action-buttons {
+          flex-direction: column;
+        }
+
+        .btn-sm {
+          width: 100%;
+          margin-bottom: 5px;
+        }
+
+        .stat-number {
+          font-size: 2rem;
+        }
+
+        .modal-content {
+          width: 95%;
+          padding: 20px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .logo h1 {
+          font-size: 2rem;
+        }
+
+        .section-title {
+          font-size: 1.2rem;
+        }
+
+        .stat-number {
+          font-size: 1.5rem;
+        }
+
+        .form-group input,
+        .form-group select {
+          font-size: 0.9rem;
+        }
+      }
+
+      /* Mobile Menu Toggle */
+      .mobile-menu-toggle {
+        display: none;
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        z-index: 2001;
+        background: #0d2bff;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1.2rem;
+      }
+
+      @media (max-width: 768px) {
+        .mobile-menu-toggle {
+          display: block;
+        }
+      }
+
+      /* Overlay untuk mobile menu */
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1999;
+      }
+
+      @media (max-width: 768px) {
+        .sidebar-overlay.active {
+          display: block;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">☰</button>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileMenu()"></div>
+    <aside class="sidebar">
+      <div class="logo">
+        <h1>ADMIN</h1>
+        <p>SHK Management</p>
+      </div>
+      <nav class="sidebar-menu">
+        <div class="menu-item active" onclick="loadPage('dashboard')">
+          <span>📊</span><span>Dashboard</span>
+        </div>
+        <div class="menu-item" onclick="loadPage('manage-all-students')">
+          <span>📋</span><span>Kelola Data Siswa</span>
+        </div>
+        <div class="menu-item" onclick="loadPage('manage-class-accounts')">
+          <span>🔑</span><span>Kelola Akun Kelas</span>
+        </div>
+        <div class="menu-item" onclick="loadPage('manage-student-accounts')">
+          <span>🔐</span><span>Kelola Akun Siswa</span>
+        </div>
+        <div class="menu-item" onclick="loadPage('manage-teachers')">
+          <span>👥</span><span>Kelola Akun Guru</span>
+        </div>
+        <div class="menu-item" onclick="loadPage('create-class-account')">
+          <span>🏫</span><span>Buat Akun Kelas (1-3)</span>
+        </div>
+        <div class="menu-item" onclick="loadPage('create-student')">
+          <span>👤</span><span>Buat Akun Siswa (4-6)</span>
+        </div>
+        <div class="menu-item" onclick="loadPage('create-teacher')">
+          <span>👨‍🏫</span><span>Buat Akun Guru</span>
+        </div>
+      </nav>
+      <div class="user-info">
+        <div style="margin-bottom: 15px"><strong id="adminName">Admin</strong></div>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+      </div>
+    </aside>
+
+    <main class="main-content"><div id="mainContent"></div></main>
+
+    <div id="modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="modal-title">Modal</h3>
+          <button class="close-modal" onclick="closeModal()">&times;</button>
+        </div>
+        <div id="modal-body"></div>
+      </div>
+    </div>
+
+    <script>
+      const api = '/api';
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      if (!user || user.role !== 'admin') {
+        alert('Akses ditolak!');
+        window.location.href = '/index.html';
+      }
+      document.getElementById('adminName').textContent = user.nama || 'Admin';
+      loadPage('dashboard');
+
+      function setActiveMenu(target) {
+        document.querySelectorAll('.menu-item').forEach((i) => i.classList.remove('active'));
+        if (target?.classList) target.classList.add('active');
+      }
+
+      async function loadPage(page) {
+        if (window.event?.target) setActiveMenu(window.event.target.closest('.menu-item'));
+        const main = document.getElementById('mainContent');
+        main.innerHTML = '<div style="text-align:center;padding:40px;">Loading...</div>';
+
+        if (page === 'dashboard') loadDashboard();
+        else if (page === 'create-class-account') loadCreateClassAccount();
+        else if (page === 'create-student') loadCreateStudent();
+        else if (page === 'create-teacher') loadCreateTeacher();
+        else if (page === 'manage-all-students') loadManageAllStudents();
+        else if (page === 'manage-class-accounts') loadManageClassAccounts();
+        else if (page === 'manage-student-accounts') loadManageStudentAccounts();
+        else if (page === 'manage-teachers') loadManageTeachers();
+      }
+
+      async function loadDashboard() {
+        const main = document.getElementById('mainContent');
+        try {
+          console.log('Loading dashboard...');
+          const timestamp = new Date().getTime();
+          const tahunRes = await fetch(`${api}/tahun-ajaran?_t=${timestamp}`);
+
+          if (!tahunRes.ok) throw new Error('Gagal memuat tahun ajaran');
+
+          const allTahun = await tahunRes.json();
+          const activeTahun = allTahun.find((t) => t.is_active) || allTahun[0];
+
+          if (!activeTahun) {
+            main.innerHTML = `<div class="content-body"><h2 class="section-title">Dashboard</h2><p style="text-align:center;padding:40px;">Belum ada tahun ajaran</p><button class="btn btn-success" onclick="showAddTahunAjaran()">+ Tambah</button></div>`;
+            return;
+          }
+
+          // Ambil data berdasarkan tahun ajaran aktif
+          const [siswaRes, guruRes, classRes] = await Promise.all([
+            fetch(`${api}/students?tahun_ajaran_id=${activeTahun.id}&_t=${timestamp}`),
+            fetch(`${api}/teachers?_t=${timestamp}`),
+            fetch(`${api}/class-accounts?tahun_ajaran_id=${activeTahun.id}&_t=${timestamp}`),
+          ]);
+
+          const siswa = siswaRes.ok ? await siswaRes.json() : [];
+          const guru = guruRes.ok ? await guruRes.json() : [];
+          const classAccounts = classRes.ok ? await classRes.json() : [];
+
+          console.log('Dashboard data:', { siswa, guru, classAccounts }); // DEBUG
+
+          const kelasRendah = siswa.filter((s) =>
+            ['1A', '1B', '1C', '2A', '2B', '2C', '3A', '3B', '3C'].includes(s.kelas)
+          );
+          const kelasTinggi = siswa.filter((s) =>
+            ['4A', '4B', '4C', '5A', '5B', '5C', '6A', '6B', '6C'].includes(s.kelas)
+          );
+          const genderL = siswa.filter((s) => s.jenis_kelamin === 'L').length;
+          const genderP = siswa.filter((s) => s.jenis_kelamin === 'P').length;
+
+          const tahunOpts = allTahun
+            .map(
+              (t) =>
+                `<option value="${t.id}" ${t.is_active ? 'selected' : ''}>${t.tahun_mulai}/${t.tahun_akhir}</option>`
+            )
+            .join('');
+
+          main.innerHTML = `
+  <div class="content-body">
+    <div style="display:flex;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:15px;">
+      <h2 class="section-title" style="margin:0;">Dashboard Admin</h2>
+      <div style="display:flex;gap:15px;align-items:center;">
+        <label>Tahun Ajaran:</label>
+        <select id="tahunSelect" onchange="changeTahun()" style="padding:8px;border-radius:6px;border:2px solid #ddd;">${tahunOpts}</select>
+        <button class="btn btn-success btn-sm" onclick="showAddTahunAjaran()">+ Tambah</button>
+      </div>
+    </div>
+    
+    <div class="info-box">
+      <strong>📌 Sistem:</strong> Kelas 1-3: 1 akun/kelas | Kelas 4-6: 1 akun/siswa<br>
+      <strong>📅 Data saat ini untuk Tahun Ajaran ${activeTahun.tahun_mulai}/${activeTahun.tahun_akhir}</strong>
+    </div>
+    
+    <div class="grid-4">
+      <div class="stat-card">
+        <div class="stat-number">${siswa.length}</div>
+        <div>Total Siswa</div>
+        <small style="opacity:0.8;margin-top:5px;display:block;">TA ${activeTahun.tahun_mulai}/${activeTahun.tahun_akhir}</small>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">${classAccounts.length}</div>
+        <div>Akun Kelas (1-3)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">${kelasTinggi.length}</div>
+        <div>Akun Siswa (4-6)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">${guru.length}</div>
+        <div>Total Guru</div>
+      </div>
+    </div>
+    
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-top:30px;">
+      <div class="stat-card">
+        <div class="stat-number">${kelasRendah.length}</div>
+        <div>Siswa Kelas 1-3</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">${genderL}</div>
+        <div>Laki-laki</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">${genderP}</div>
+        <div>Perempuan</div>
+      </div>
+    </div>
+
+   <div style="margin-top:40px;" id="comparisonSection">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <h3>📊 Perbandingan Data Antar Tahun Ajaran</h3>
+        <button class="btn btn-primary btn-sm" onclick="exportPDF()">Export PDF</button>
+      </div>
+      
+      <!-- Grafik -->
+      <div style="background:white;padding:30px;border-radius:12px;margin-bottom:30px;box-shadow:0 2px 10px rgba(0,0,0,0.1);">
+        <canvas id="comparisonChart" style="max-height:400px;"></canvas>
+      </div>
+      
+      <!-- Tabel -->
+      <table id="comparisonTable">
+        <thead>
+          <tr>
+            <th>Tahun Ajaran</th>
+            <th>Total Siswa</th>
+            <th>Laki-laki</th>
+            <th>Perempuan</th>
+            <th>Total Guru</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="tahunAjaranComparison">
+          <tr><td colspan="6" style="text-align:center;">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+`;
+
+          // Load comparison data
+          loadTahunAjaranComparison();
+        } catch (e) {
+          console.error('Dashboard error:', e);
+          main.innerHTML = `<div style="color:red;padding:20px;">Error: ${e.message}</div>`;
+        }
+      }
+
+      async function loadTahunAjaranComparison() {
+        try {
+          const tahunRes = await fetch(`${api}/tahun-ajaran`);
+          const allTahun = await tahunRes.json();
+          allTahun.sort((a, b) => b.tahun_mulai - a.tahun_mulai);
+
+          const tbody = document.getElementById('tahunAjaranComparison');
+          let html = '';
+
+          const historicalData = {
+            '2023/2024': { total: 473, laki: 252, perempuan: 221, guru: 28 },
+            '2024/2025': { total: 443, laki: 245, perempuan: 198, guru: 28 },
+            '2025/2026': { total: 423, laki: 230, perempuan: 193, guru: 28 },
+          };
+
+          const chartData = {
+            labels: [],
+            totalSiswa: [],
+            laki: [],
+            perempuan: [],
+          };
+
+          for (const ta of allTahun) {
+            const yearKey = `${ta.tahun_mulai}/${ta.tahun_akhir}`;
+            let total = 0,
+              laki = 0,
+              perempuan = 0;
+
+            if (historicalData[yearKey]) {
+              const data = historicalData[yearKey];
+              total = data.total;
+              laki = data.laki;
+              perempuan = data.perempuan;
+            } else {
+              const siswaRes = await fetch(`${api}/students?tahun_ajaran_id=${ta.id}`);
+              const siswa = await siswaRes.json();
+              total = siswa.length;
+              laki = siswa.filter((s) => s.jenis_kelamin === 'L').length;
+              perempuan = siswa.filter((s) => s.jenis_kelamin === 'P').length;
+            }
+
+            // Data untuk chart
+            chartData.labels.unshift(yearKey);
+            chartData.totalSiswa.unshift(total);
+            chartData.laki.unshift(laki);
+            chartData.perempuan.unshift(perempuan);
+
+            html += `
+        <tr>
+          <td><strong>${yearKey}</strong></td>
+          <td>${total}</td>
+          <td>${laki}</td>
+          <td>${perempuan}</td>
+          <td>28</td>
+          <td>${ta.is_active ? '<span style="background:#10b981;color:white;padding:4px 8px;border-radius:4px;">Aktif</span>' : '<span style="color:#6b7280;">Non-Aktif</span>'}</td>
+        </tr>
+      `;
+          }
+
+          tbody.innerHTML =
+            html || '<tr><td colspan="6" style="text-align:center;">Belum ada data</td></tr>';
+
+          // Render chart
+          renderComparisonChart(chartData);
+        } catch (error) {
+          console.error('Comparison error:', error);
+          document.getElementById('tahunAjaranComparison').innerHTML =
+            '<tr><td colspan="6" style="text-align:center;color:red;">Error memuat data</td></tr>';
+        }
+      }
+
+      let comparisonChart = null;
+
+      function renderComparisonChart(data) {
+        const ctx = document.getElementById('comparisonChart');
+
+        // Destroy existing chart
+        if (comparisonChart) {
+          comparisonChart.destroy();
+        }
+
+        comparisonChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: data.labels,
+            datasets: [
+              {
+                label: 'Laki-laki',
+                data: data.laki,
+                backgroundColor: '#3b82f6',
+                borderColor: '#2563eb',
+                borderWidth: 1,
+              },
+              {
+                label: 'Perempuan',
+                data: data.perempuan,
+                backgroundColor: '#ec4899',
+                borderColor: '#db2777',
+                borderWidth: 1,
+              },
+              {
+                label: 'Total Siswa',
+                data: data.totalSiswa,
+                type: 'line',
+                borderColor: '#8b5cf6',
+                backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                borderWidth: 3,
+                fill: false,
+                tension: 0.4,
+                pointRadius: 5,
+                pointBackgroundColor: '#8b5cf6',
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+              legend: {
+                display: true,
+                position: 'top',
+              },
+              title: {
+                display: true,
+                text: 'Perbandingan Jumlah Siswa Per Tahun Ajaran',
+                font: { size: 16, weight: 'bold' },
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  stepSize: 50,
+                },
+                title: {
+                  display: true,
+                  text: 'Jumlah Siswa',
+                },
+              },
+              x: {
+                title: {
+                  display: true,
+                  text: 'Tahun Ajaran',
+                },
+              },
+            },
+          },
+        });
+      }
+
+      async function exportPDF() {
+        const { jsPDF } = window.jspdf;
+
+        try {
+          // Ambil data tahun ajaran
+          const tahunRes = await fetch(`${api}/tahun-ajaran`);
+          const allTahun = await tahunRes.json();
+          allTahun.sort((a, b) => b.tahun_mulai - a.tahun_mulai);
+
+          const historicalData = {
+            '2024/2025': {
+              total: 443,
+              laki: 245,
+              perempuan: 198,
+              guru: 28,
+              kelas1_3: 206,
+              kelas4_6: 237,
+            },
+            '2025/2026': {
+              total: 423,
+              laki: 230,
+              perempuan: 193,
+              guru: 28,
+              kelas1_3: 206,
+              kelas4_6: 217,
+            },
+          };
+
+          const pdf = new jsPDF('p', 'mm', 'a4');
+          let yPos = 20;
+
+          // Header
+          pdf.setFontSize(18);
+          pdf.setFont(undefined, 'bold');
+          pdf.text('Laporan Data Siswa Per Tahun Ajaran', 105, yPos, { align: 'center' });
+          yPos += 8;
+          pdf.setFontSize(12);
+          pdf.setFont(undefined, 'normal');
+          pdf.text('SHK Management System', 105, yPos, { align: 'center' });
+          yPos += 6;
+          pdf.setFontSize(10);
+          pdf.text(
+            `Dicetak: ${new Date().toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`,
+            105,
+            yPos,
+            { align: 'center' }
+          );
+          yPos += 15;
+
+          // Loop setiap tahun ajaran
+          for (const ta of allTahun) {
+            const yearKey = `${ta.tahun_mulai}/${ta.tahun_akhir}`;
+            let siswaData = { total: 0, laki: 0, perempuan: 0, kelas1_3: 0, kelas4_6: 0 };
+
+            if (historicalData[yearKey]) {
+              siswaData = historicalData[yearKey];
+            } else {
+              const siswaRes = await fetch(`${api}/students?tahun_ajaran_id=${ta.id}`);
+              const siswa = await siswaRes.json();
+              siswaData.total = siswa.length;
+              siswaData.laki = siswa.filter((s) => s.jenis_kelamin === 'L').length;
+              siswaData.perempuan = siswa.filter((s) => s.jenis_kelamin === 'P').length;
+              siswaData.kelas1_3 = siswa.filter((s) =>
+                ['1A', '1B', '1C', '2A', '2B', '2C', '3A', '3B', '3C'].includes(s.kelas)
+              ).length;
+              siswaData.kelas4_6 = siswa.filter((s) =>
+                ['4A', '4B', '4C', '5A', '5B', '5C', '6A', '6B', '6C'].includes(s.kelas)
+              ).length;
+            }
+
+            // Check if need new page
+            if (yPos > 250) {
+              pdf.addPage();
+              yPos = 20;
+            }
+
+            // Tahun Ajaran Header
+            pdf.setFillColor(13, 43, 255);
+            pdf.rect(15, yPos - 5, 180, 10, 'F');
+            pdf.setTextColor(255, 255, 255);
+            pdf.setFontSize(14);
+            pdf.setFont(undefined, 'bold');
+            pdf.text(`Tahun Ajaran ${yearKey}`, 20, yPos);
+            if (ta.is_active) {
+              pdf.setFontSize(9);
+              pdf.text('(AKTIF)', 175, yPos, { align: 'right' });
+            }
+            yPos += 12;
+
+            pdf.setTextColor(0, 0, 0);
+            pdf.setFontSize(11);
+
+            // Box 1: Total Siswa
+            pdf.setFillColor(245, 247, 250);
+            pdf.rect(15, yPos, 85, 35, 'F');
+            pdf.setDrawColor(200, 200, 200);
+            pdf.rect(15, yPos, 85, 35, 'S');
+
+            pdf.setFont(undefined, 'bold');
+            pdf.text('TOTAL SISWA', 20, yPos + 7);
+            pdf.setFontSize(24);
+            pdf.text(siswaData.total.toString(), 57.5, yPos + 22, { align: 'center' });
+            pdf.setFontSize(9);
+            pdf.setFont(undefined, 'normal');
+            pdf.text('siswa terdaftar', 57.5, yPos + 30, { align: 'center' });
+
+            // Box 2: Total Guru
+            pdf.setFillColor(245, 247, 250);
+            pdf.rect(110, yPos, 85, 35, 'F');
+            pdf.rect(110, yPos, 85, 35, 'S');
+
+            pdf.setFontSize(11);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('TOTAL GURU', 115, yPos + 7);
+            pdf.setFontSize(24);
+            pdf.text('28', 152.5, yPos + 22, { align: 'center' });
+            pdf.setFontSize(9);
+            pdf.setFont(undefined, 'normal');
+            pdf.text('guru aktif', 152.5, yPos + 30, { align: 'center' });
+
+            yPos += 40;
+
+            // Breakdown Gender
+            pdf.setFontSize(11);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('Berdasarkan Jenis Kelamin:', 15, yPos);
+            yPos += 8;
+
+            // Laki-laki
+            pdf.setFillColor(59, 130, 246);
+            pdf.rect(20, yPos - 5, 80, 12, 'F');
+            pdf.setTextColor(255, 255, 255);
+            pdf.setFont(undefined, 'normal');
+            pdf.text('Laki-laki', 25, yPos);
+            pdf.setFont(undefined, 'bold');
+            pdf.text(
+              `${siswaData.laki} siswa (${((siswaData.laki / siswaData.total) * 100).toFixed(1)}%)`,
+              95,
+              yPos,
+              { align: 'right' }
+            );
+            yPos += 15;
+
+            // Perempuan
+            pdf.setFillColor(236, 72, 153);
+            pdf.rect(20, yPos - 5, 80, 12, 'F');
+            pdf.text('Perempuan', 25, yPos);
+            pdf.text(
+              `${siswaData.perempuan} siswa (${((siswaData.perempuan / siswaData.total) * 100).toFixed(1)}%)`,
+              95,
+              yPos,
+              { align: 'right' }
+            );
+            yPos += 18;
+
+            pdf.setTextColor(0, 0, 0);
+
+            // Breakdown Kelas
+            pdf.setFontSize(11);
+            pdf.setFont(undefined, 'bold');
+            pdf.text('Berdasarkan Tingkat Kelas:', 15, yPos);
+            yPos += 8;
+
+            // Kelas 1-3
+            pdf.setFillColor(245, 247, 250);
+            pdf.rect(20, yPos - 5, 80, 12, 'F');
+            pdf.setDrawColor(200, 200, 200);
+            pdf.rect(20, yPos - 5, 80, 12, 'S');
+            pdf.setFont(undefined, 'normal');
+            pdf.setTextColor(0, 0, 0);
+            pdf.text('Kelas 1-3 (Akun Kelas)', 25, yPos);
+            pdf.setFont(undefined, 'bold');
+            pdf.text(`${siswaData.kelas1_3} siswa`, 95, yPos, { align: 'right' });
+            yPos += 15;
+
+            // Kelas 4-6
+            pdf.setFillColor(245, 247, 250);
+            pdf.rect(20, yPos - 5, 80, 12, 'F');
+            pdf.rect(20, yPos - 5, 80, 12, 'S');
+            pdf.setFont(undefined, 'normal');
+            pdf.text('Kelas 4-6 (Akun Individual)', 25, yPos);
+            pdf.setFont(undefined, 'bold');
+            pdf.text(`${siswaData.kelas4_6} siswa`, 95, yPos, { align: 'right' });
+            yPos += 20;
+
+            // Divider
+            pdf.setDrawColor(200, 200, 200);
+            pdf.line(15, yPos, 195, yPos);
+            yPos += 15;
+          }
+
+          // Footer
+          yPos = 280;
+          pdf.setFontSize(8);
+          pdf.setTextColor(128, 128, 128);
+          pdf.setFont(undefined, 'italic');
+          pdf.text('Dokumen ini digenerate otomatis oleh SHK Admin Portal', 105, yPos, {
+            align: 'center',
+          });
+          pdf.text(`${new Date().toLocaleString('id-ID')}`, 105, yPos + 4, { align: 'center' });
+
+          pdf.save(`Laporan_Siswa_Per_Tahun_${new Date().toISOString().split('T')[0]}.pdf`);
+        } catch (error) {
+          console.error('Export error:', error);
+          alert('❌ Gagal export PDF: ' + error.message);
+        }
+      }
+
+      async function changeTahun() {
+        const id = document.getElementById('tahunSelect').value;
+        try {
+          await fetch(`${api}/tahun-ajaran/${id}/activate`, { method: 'PUT' });
+          await loadDashboard();
+        } catch (e) {
+          console.error('Change tahun error:', e);
+        }
+      }
+
+      function showAddTahunAjaran() {
+        showModal(
+          'Tambah Tahun Ajaran',
+          `
+        <form onsubmit="addTahun(event)">
+          <div class="form-group"><label>Tahun Mulai</label><input type="number" id="tahun-mulai" required min="2020" max="2050"></div>
+          <div class="form-group"><label>Tahun Akhir</label><input type="number" id="tahun-akhir" required min="2020" max="2050"></div>
+          <button type="submit" class="btn btn-primary">Simpan</button>
+        </form>
+      `
+        );
+      }
+
+      async function addTahun(e) {
+        e.preventDefault();
+        try {
+          const res = await fetch(`${api}/tahun-ajaran`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              tahun_mulai: document.getElementById('tahun-mulai').value,
+              tahun_akhir: document.getElementById('tahun-akhir').value,
+            }),
+          });
+          if (res.ok) {
+            alert('Berhasil!');
+            closeModal();
+            loadDashboard();
+          }
+        } catch (e) {
+          alert('Error: ' + e.message);
+        }
+      }
+
+      async function changeTahun() {
+        const id = document.getElementById('tahunSelect').value;
+        try {
+          await fetch(`${api}/tahun-ajaran/${id}/activate`, { method: 'PUT' });
+          loadDashboard();
+        } catch (e) {}
+      }
+
+      // BUAT AKUN KELAS
+      function loadCreateClassAccount() {
+        const main = document.getElementById('mainContent');
+        main.innerHTML = `
+<div class="content-body">
+  <h2 class="section-title">Buat Akun Kelas (1-3)</h2>
+  <div class="info-box">1 akun untuk 1 kelas • Dikelola guru wali kelas</div>
+  <form onsubmit="createClassAccount(event)">
+    <div class="form-group"><label>Kelas</label>
+      <select id="class-name" required onchange="updateUsername()">
+        <option value="">Pilih</option>
+        ${['1A', '1B', '1C', '2A', '2B', '2C', '3A', '3B', '3C'].map((k) => `<option value="${k}">${k}</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-group"><label>Username</label><input type="text" id="class-username" readonly style="background:#f3f4f6;"></div>
+    <div class="form-group"><label>Password</label><input type="password" id="class-password" value="kelas123" required></div>
+    <div class="form-group"><label>Wali Kelas (opsional)</label><input type="text" id="class-teacher"
+         pattern="[a-zA-Z\s]*"
+         title="Nama hanya boleh berisi huruf"
+         oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '')"
+         placeholder="Masukkan nama wali kelas (opsional)"></div>
+    <button type="submit" class="btn btn-primary">Buat Akun</button>
+  </form>
+</div>`;
+      }
+
+      function updateUsername() {
+        const kelas = document.getElementById('class-name').value;
+        document.getElementById('class-username').value = kelas ? `kelas_${kelas}` : '';
+      }
+
+      async function createClassAccount(e) {
+        e.preventDefault();
+        try {
+          const tahunRes = await fetch(`${api}/tahun-ajaran`);
+          const allTahun = await tahunRes.json();
+          const active = allTahun.find((t) => t.is_active);
+
+          const res = await fetch(`${api}/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              role: 'class_account',
+              kelas: document.getElementById('class-name').value,
+              username: document.getElementById('class-username').value,
+              password: document.getElementById('class-password').value,
+              wali_kelas: document.getElementById('class-teacher').value,
+              tahun_ajaran_id: active?.id,
+            }),
+          });
+
+          if (res.ok) {
+            alert('Akun kelas berhasil dibuat!');
+            loadCreateClassAccount();
+          } else {
+            const data = await res.json();
+            alert(data.error || 'Gagal');
+          }
+        } catch (e) {
+          alert('Error: ' + e.message);
+        }
+      }
+
+      // BUAT AKUN SISWA
+      function loadCreateStudent() {
+        const main = document.getElementById('mainContent');
+        main.innerHTML = `
+<div class="content-body">
+  <h2 class="section-title">Buat Akun Siswa (4-6)</h2>
+  <div class="info-box">1 akun per siswa • Siswa login sendiri</div>
+  <form onsubmit="createStudent(event)">
+    <div class="form-group"><label>NIS</label><input type="text" id="nis" required></div>
+    <div class="form-group"><label>Nama</label><input type="text" id="nama" required
+         pattern="[a-zA-Z\s]+"
+         title="Nama hanya boleh berisi huruf"
+         oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '')"
+         placeholder="Masukkan nama (hanya huruf)"></div>
+    <div class="form-group"><label>Email</label><input type="email" id="email" required></div>
+    <div class="form-group"><label>Password</label><input type="password" id="password" required></div>
+    <div class="form-group"><label>Kelas</label>
+      <select id="kelas" required>
+        <option value="">Pilih</option>
+        ${['4A', '4B', '4C', '5A', '5B', '5C', '6A', '6B', '6C'].map((k) => `<option value="${k}">${k}</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-group"><label>Jenis Kelamin</label>
+      <select id="jenis_kelamin" required>
+        <option value="">Pilih</option>
+        <option value="L">Laki-laki</option>
+        <option value="P">Perempuan</option>
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary">Buat Akun</button>
+  </form>
+</div>`;
+      }
+
+      async function createStudent(e) {
+        e.preventDefault();
+        try {
+          const tahunRes = await fetch(`${api}/tahun-ajaran`);
+          const allTahun = await tahunRes.json();
+          const active = allTahun.find((t) => t.is_active);
+
+          const res = await fetch(`${api}/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              role: 'siswa',
+              account_type: 'individual',
+              nis: document.getElementById('nis').value,
+              nama: document.getElementById('nama').value,
+              email: document.getElementById('email').value,
+              password: document.getElementById('password').value,
+              kelas: document.getElementById('kelas').value,
+              jenis_kelamin: document.getElementById('jenis_kelamin').value,
+              tahun_ajaran_id: active?.id,
+            }),
+          });
+
+          if (res.ok) {
+            alert('Akun siswa berhasil dibuat!');
+            loadCreateStudent();
+          } else {
+            const data = await res.json();
+            alert(data.error || 'Gagal');
+          }
+        } catch (e) {
+          alert('Error: ' + e.message);
+        }
+      }
+
+      // BUAT AKUN GURU
+      function loadCreateTeacher() {
+        const main = document.getElementById('mainContent');
+        main.innerHTML = `
+<div class="content-body">
+  <h2 class="section-title">Buat Akun Guru</h2>
+  <form onsubmit="createTeacher(event)">
+    <div class="form-group"><label>Nama</label><input type="text" id="nama-guru" required
+         pattern="[a-zA-Z\s]+"
+         title="Nama hanya boleh berisi huruf"
+         oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '')"
+         placeholder="Masukkan nama (hanya huruf)"></div>
+    <div class="form-group"><label>Email</label><input type="email" id="email-guru" required></div>
+    <div class="form-group"><label>Password</label><input type="password" id="password-guru" required></div>
+    <div class="form-group"><label>Spesialisasi</label><input type="text" id="spesialisasi"></div>
+    <button type="submit" class="btn btn-primary">Buat Akun</button>
+  </form>
+</div>`;
+      }
+
+      async function createTeacher(e) {
+        e.preventDefault();
+        try {
+          const tahunRes = await fetch(`${api}/tahun-ajaran`);
+          const allTahun = await tahunRes.json();
+          const active = allTahun.find((t) => t.is_active);
+
+          const res = await fetch(`${api}/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              role: 'guru',
+              nama: document.getElementById('nama-guru').value,
+              email: document.getElementById('email-guru').value,
+              password: document.getElementById('password-guru').value,
+              spesialisasi: document.getElementById('spesialisasi').value,
+              tahun_ajaran_id: active?.id,
+            }),
+          });
+
+          if (res.ok) {
+            alert('Akun guru berhasil dibuat!');
+            loadCreateTeacher();
+          } else {
+            const data = await res.json();
+            alert(data.error || 'Gagal');
+          }
+        } catch (e) {
+          alert('Error: ' + e.message);
+        }
+      }
+
+      // KELOLA DATA SISWA
+      async function loadManageAllStudents() {
+        const main = document.getElementById('mainContent');
+        try {
+          const res = await fetch(`${api}/students`);
+          const siswa = await res.json();
+
+          const tableHTML = siswa
+            .map(
+              (s) => `
+          <tr class="student-row" data-nis="${s.nis}" data-nama="${s.nama.toLowerCase()}" data-kelas="${s.kelas || ''}" data-email="${s.email || ''}">
+            <td>${s.nis}</td>
+            <td>${s.nama}</td>
+            <td>${s.kelas || '-'}</td>
+            <td>${s.jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan'}</td>
+            <td>${s.email || '-'}</td>
+            <td class="action-buttons">
+              <button class="btn btn-primary btn-sm" onclick="editStudentData(${s.id})">Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteStudentData(${s.id})">Hapus</button>
+            </td>
+          </tr>
+        `
+            )
+            .join('');
+
+          main.innerHTML = `
+<div class="content-body">
+  <h2 class="section-title">Kelola Data Siswa</h2>
+  <div class="info-box">Data SEMUA siswa (kelas 1-6)</div>
+  <div style="display:flex;justify-content:space-between;gap:15px;margin-bottom:20px;">
+    <div class="search-box" style="flex:1;margin:0;">
+      <input type="text" id="searchStudents" placeholder="🔍 Cari berdasarkan NIS, Nama, Kelas, atau Email..." onkeyup="searchTable('student-row', 'searchStudents')">
+    </div>
+    <button class="btn btn-success" onclick="showAddStudentData()" style="white-space:nowrap;">+ Tambah Data</button>
+  </div>
+  <div style="margin-bottom:10px;color:#6b7280;" id="studentCount">Menampilkan ${siswa.length} siswa</div>
+  <table>
+    <thead><tr><th>NIS</th><th>Nama</th><th>Kelas</th><th>JK</th><th>Email</th><th>Aksi</th></tr></thead>
+    <tbody>${tableHTML || '<tr><td colspan="6" style="text-align:center;">Belum ada data</td></tr>'}</tbody>
+  </table>
+</div>`;
+        } catch (e) {
+          main.innerHTML = `<div style="color:red;padding:20px;">Error: ${e.message}</div>`;
+        }
+      }
+
+      function showAddStudentData() {
+        showModal(
+          'Tambah Data Siswa',
+          `
+        <form onsubmit="saveStudentData(event)">
+          <div class="form-group"><label>NIS</label><input type="text" id="data-nis" required></div>
+          <div class="form-group"><label>Nama</label><input type="text" id="data-nama" required
+         pattern="[a-zA-Z\s]+"
+         title="Nama hanya boleh berisi huruf"
+         oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '')"
+         placeholder="Masukkan nama (hanya huruf)"></div>
+          <div class="form-group"><label>Kelas</label>
+            <select id="data-kelas" required>
+              <option value="">Pilih</option>
+              ${['1A', '1B', '1C', '2A', '2B', '2C', '3A', '3B', '3C', '4A', '4B', '4C', '5A', '5B', '5C', '6A', '6B', '6C'].map((k) => `<option value="${k}">${k}</option>`).join('')}
+            </select>
+          </div>
+          <div class="form-group"><label>Jenis Kelamin</label>
+            <select id="data-gender" required>
+              <option value="L">Laki-laki</option>
+              <option value="P">Perempuan</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Email (opsional)</label><input type="email" id="data-email"></div>
+          <button type="submit" class="btn btn-success">Simpan</button>
+          <button type="button" class="btn btn-secondary" onclick="closeModal()">Batal</button>
+        </form>
+      `
+        );
+      }
+
+      async function saveStudentData(event) {
+        event.preventDefault();
+        try {
+          const tahunRes = await fetch(`${api}/tahun-ajaran`);
+          const allTahun = await tahunRes.json();
+          const active = allTahun.find((t) => t.is_active);
+
+          const res = await fetch(`${api}/students`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              nis: document.getElementById('data-nis').value,
+              nama: document.getElementById('data-nama').value,
+              kelas: document.getElementById('data-kelas').value,
+              jenis_kelamin: document.getElementById('data-gender').value,
+              email: document.getElementById('data-email').value,
+              tahun_ajaran_id: active?.id,
+            }),
+          });
+
+          // TAMBAHKAN CEK RESPONSE
+          if (!res.ok) {
+            const errorData = await res.json();
+            alert(errorData.error || 'Gagal menyimpan data');
+            return; // STOP di sini
+          }
+
+          alert('Data berhasil ditambahkan!');
+          closeModal();
+          loadManageAllStudents();
+        } catch (e) {
+          alert('Error: ' + e.message);
+        }
+      }
+
+      async function editStudentData(id) {
+        try {
+          const res = await fetch(`${api}/students/${id}`);
+          const s = await res.json();
+
+          console.log('Student data:', s); // DEBUG
+
+          showModal(
+            'Edit Data Siswa',
+            `
+      <form onsubmit="updateStudentData(event, ${id})">
+        <div class="form-group">
+          <label>NIS</label>
+          <input type="text" value="${s.nis}" readonly style="background:#f3f4f6;">
+        </div>
+        <div class="form-group">
+          <label>Nama</label>
+          <input type="text" id="edit-nama" value="${s.nama}" required
+         pattern="[a-zA-Z\s]+"
+         title="Nama hanya boleh berisi huruf"
+         oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '')"
+         placeholder="Masukkan nama (hanya huruf)">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="edit-email" value="${s.email || ''}" placeholder="email@example.com">
+        </div>
+        <div class="form-group">
+          <label>Kelas</label>
+          <select id="edit-kelas" required>
+            ${[
+              '1A',
+              '1B',
+              '1C',
+              '2A',
+              '2B',
+              '2C',
+              '3A',
+              '3B',
+              '3C',
+              '4A',
+              '4B',
+              '4C',
+              '5A',
+              '5B',
+              '5C',
+              '6A',
+              '6B',
+              '6C',
+            ]
+              .map((k) => `<option value="${k}" ${s.kelas === k ? 'selected' : ''}>${k}</option>`)
+              .join('')}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Jenis Kelamin</label>
+          <select id="edit-gender" required>
+            <option value="L" ${s.jenis_kelamin === 'L' ? 'selected' : ''}>Laki-laki</option>
+            <option value="P" ${s.jenis_kelamin === 'P' ? 'selected' : ''}>Perempuan</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-success">Update</button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">Batal</button>
+      </form>
+    `
+          );
+        } catch (e) {
+          console.error('Edit error:', e);
+          alert('Error: ' + e.message);
+        }
+      }
+
+      async function updateStudentData(e, id) {
+        e.preventDefault();
+        try {
+          const payload = {
+            nama: document.getElementById('edit-nama').value,
+            email: document.getElementById('edit-email').value,
+            kelas: document.getElementById('edit-kelas').value,
+            jenis_kelamin: document.getElementById('edit-gender').value,
+          };
+
+          console.log('Updating student:', payload); // DEBUG
+
+          const res = await fetch(`${api}/students/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+
+          const data = await res.json();
+          console.log('Response:', data); // DEBUG
+
+          if (res.ok) {
+            alert('Data berhasil diupdate!');
+            closeModal();
+            loadManageAllStudents();
+          } else {
+            alert(data.error || 'Gagal update');
+          }
+        } catch (e) {
+          console.error('Update error:', e);
+          alert('Error: ' + e.message);
+        }
+      }
+
+      async function updateStudentData(e, id) {
+        e.preventDefault();
+        try {
+          const payload = {
+            nama: document.getElementById('edit-nama').value,
+            email: document.getElementById('edit-email').value,
+            kelas: document.getElementById('edit-kelas').value,
+            jenis_kelamin: document.getElementById('edit-gender').value,
+          };
+
+          console.log('Updating student:', payload); // DEBUG
+
+          const res = await fetch(`${api}/students/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+
+          const data = await res.json();
+          console.log('Response:', data); // DEBUG
+
+          if (res.ok) {
+            alert('Data berhasil diupdate!');
+            closeModal();
+            loadManageAllStudents();
+          } else {
+            alert(data.error || 'Gagal update');
+          }
+        } catch (e) {
+          console.error('Update error:', e);
+          alert('Error: ' + e.message);
+        }
+      }
+
+      async function deleteStudentData(id) {
+        if (!confirm('Hapus data ini?')) return;
+        try {
+          const res = await fetch(`${api}/students/${id}`, { method: 'DELETE' });
+          if (res.ok) {
+            alert('Data berhasil dihapus!');
+            loadManageAllStudents();
+          }
+        } catch (e) {
+          alert('Error: ' + e.message);
+        }
+      }
+
+      // KELOLA AKUN KELAS
+      async function loadManageClassAccounts() {
+        const main = document.getElementById('mainContent');
+        try {
+          const res = await fetch(`${api}/class-accounts`);
+          const accounts = await res.json();
+
+          const tableHTML = accounts
+            .map(
+              (c) => `
+          <tr class="class-row" data-kelas="${c.kelas}" data-username="${c.username}" data-wali="${(c.wali_kelas || '').toLowerCase()}">
+            <td>${c.kelas}</td>
+            <td>${c.username}</td>
+            <td>${c.wali_kelas || '-'}</td>
+            <td>••••••••</td>
+            <td class="action-buttons">
+              <button class="btn btn-primary btn-sm" onclick="editClassAccount(${c.id})">Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteClassAccount(${c.id})">Hapus</button>
+            </td>
+          </tr>
+        `
+            )
+            .join('');
+
+          main.innerHTML = `
+<div class="content-body">
+  <h2 class="section-title">Kelola Akun Kelas (1-3)</h2>
+  <div class="info-box">Akun untuk guru wali kelas</div>
+  <div class="search-box">
+    <input type="text" id="searchClass" placeholder="🔍 Cari berdasarkan Kelas, Username, atau Wali Kelas..." onkeyup="searchTable('class-row', 'searchClass')">
+  </div>
+  <div style="margin-bottom:10px;color:#6b7280;" id="classCount">Menampilkan ${accounts.length} akun kelas</div>
+  <table>
+    <thead><tr><th>Kelas</th><th>Username</th><th>Wali Kelas</th><th>Password</th><th>Aksi</th></tr></thead>
+    <tbody>${tableHTML || '<tr><td colspan="5" style="text-align:center;">Belum ada akun</td></tr>'}</tbody>
+  </table>
+</div>`;
+        } catch (e) {
+          main.innerHTML = `<div style="color:red;padding:20px;">Error: ${e.message}</div>`;
+        }
+      }
+
+      async function editClassAccount(id) {
+        try {
+          const res = await fetch(`${api}/class-accounts/${id}`);
+          const acc = await res.json();
+
+          showModal(
+            'Edit Akun Kelas',
+            `
+      <form onsubmit="updateClassAccount(event, ${id})">
+        <div class="form-group"><label>Kelas</label><input type="text" value="${acc.kelas}" readonly style="background:#f3f4f6;"></div>
+        <div class="form-group"><label>Username</label><input type="text" value="${acc.username}" readonly style="background:#f3f4f6;"></div>
+        
+        <div class="info-box" style="background:#fef3c7;border-color:#fcd34d;color:#92400e;">
+          <strong>🔒 Keamanan:</strong> Password lama disimpan terenkripsi dan tidak dapat ditampilkan
+        </div>
+        
+        <div class="form-group">
+          <label>Password Baru (kosongkan jika tidak ingin mengubah)</label>
+          <div class="password-toggle">
+            <input type="password" id="edit-class-pwd" placeholder="Masukkan password baru">
+            <button type="button" class="password-toggle-btn" onclick="togglePassword('edit-class-pwd', this)">👁️</button>
+          </div>
+        </div>
+        <div class="form-group"><label>Wali Kelas</label><input type="text" id="edit-class-wali" value="${acc.wali_kelas || ''}"></div>
+        <button type="submit" class="btn btn-success">Update</button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">Batal</button>
+      </form>
+    `
+          );
+        } catch (e) {
+          alert('Error: ' + e.message);
+        }
+      }
+
+      async function updateClassAccount(e, id) {
+        e.preventDefault();
+        try {
+          const payload = { wali_kelas: document.getElementById('edit-class-wali').value };
+          const pwd = document.getElementById('edit-class-pwd').value;
+          if (pwd) payload.password = pwd;
+
+          const res = await fetch(`${api}/class-accounts/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+
+          if (res.ok) {
+            alert('Akun berhasil diupdate!');
+            closeModal();
+            loadManageClassAccounts();
+          }
+        } catch (e) {
+          alert('Error: ' + e.message);
+        }
+      }
+
+      async function deleteClassAccount(id) {
+        if (!confirm('Hapus akun kelas ini?')) return;
+        try {
+          const res = await fetch(`${api}/class-accounts/${id}`, { method: 'DELETE' });
+          if (res.ok) {
+            alert('Akun berhasil dihapus!');
+            loadManageClassAccounts();
+          }
+        } catch (e) {
+          alert('Error: ' + e.message);
+        }
+      }
+
+      // KELOLA AKUN SISWA (4-6)
+      async function loadManageStudentAccounts() {
+        const main = document.getElementById('mainContent');
+        try {
+          const res = await fetch(`${api}/students?has_account=true`);
+          const siswa = await res.json();
+          const kelasTinggi = siswa.filter((s) =>
+            ['4A', '4B', '4C', '5A', '5B', '5C', '6A', '6B', '6C'].includes(s.kelas)
+          );
+
+          const tableHTML = kelasTinggi
+            .map(
+              (s) => `
+          <tr class="student-account-row" data-nis="${s.nis}" data-nama="${s.nama.toLowerCase()}" data-kelas="${s.kelas}" data-email="${s.email}">
+            <td>${s.nis}</td>
+            <td>${s.nama}</td>
+            <td>${s.kelas}</td>
+            <td>${s.email}</td>
+            <td>••••••••</td>
+            <td class="action-buttons">
+              <button class="btn btn-primary btn-sm" onclick="editStudentEmail(${s.id}, '${s.email || ''}')">Edit Email</button>
+  <button class="btn btn-success btn-sm" onclick="resetStudentPassword(${s.id})">Reset Password</button>
+  <button class="btn btn-danger btn-sm" onclick="deleteStudentAccount(${s.id})">Hapus Akun</button>
+            </td>
+          </tr>
+        `
+            )
+            .join('');
+
+          main.innerHTML = `
+<div class="content-body">
+  <h2 class="section-title">Kelola Akun Siswa (4-6)</h2>
+  <div class="info-box">Akun siswa individual</div>
+  <div class="search-box">
+    <input type="text" id="searchStudentAccount" placeholder="🔍 Cari berdasarkan NIS, Nama, Kelas, atau Email..." onkeyup="searchTable('student-account-row', 'searchStudentAccount')">
+  </div>
+  <div style="margin-bottom:10px;color:#6b7280;" id="studentAccountCount">Menampilkan ${kelasTinggi.length} akun siswa</div>
+  <table>
+    <thead><tr><th>NIS</th><th>Nama</th><th>Kelas</th><th>Email</th><th>Password</th><th>Aksi</th></tr></thead>
+    <tbody>${tableHTML || '<tr><td colspan="6" style="text-align:center;">Belum ada akun</td></tr>'}</tbody>
+  </table>
+</div>`;
+        } catch (e) {
+          main.innerHTML = `<div style="color:red;padding:20px;">Error: ${e.message}</div>`;
+        }
+      }
+
+      function editStudentEmail(siswaId, currentEmail) {
+        showModal(
+          'Edit Email Siswa',
+          `
+    <form onsubmit="saveStudentEmail(event, ${siswaId})">
+      <div class="form-group">
+        <label>Email Baru</label>
+        <input type="email" id="new-email" value="${currentEmail}" required placeholder="siswa@email.com">
+      </div>
+      <button type="submit" class="btn btn-primary">Simpan</button>
+      <button type="button" class="btn btn-secondary" onclick="closeModal()">Batal</button>
+    </form>
+  `
+        );
+      }
+
+      async function saveStudentEmail(event, siswaId) {
+        event.preventDefault();
+        const email = document.getElementById('new-email').value;
+
+        try {
+          // Ambil data siswa dulu untuk mendapatkan field lainnya
+          const getRes = await fetch(`${api}/students/${siswaId}`);
+          const siswa = await getRes.json();
+
+          // Update dengan semua field yang diperlukan
+          const res = await fetch(`${api}/students/${siswaId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              nama: siswa.nama,
+              email: email,
+              kelas: siswa.kelas,
+              jenis_kelamin: siswa.jenis_kelamin,
+            }),
+          });
+
+          if (res.ok) {
+            alert('✅ Email berhasil diupdate!');
+            closeModal();
+            loadManageStudentAccounts();
+          } else {
+            const errorData = await res.json();
+            alert('❌ Gagal update email: ' + (errorData.error || 'Unknown error'));
+          }
+        } catch (error) {
+          alert('Error: ' + error.message);
+        }
+      }
+
+      async function resetStudentPassword(id) {
+        showModal(
+          'Reset Password Siswa',
+          `
+    <form onsubmit="saveResetStudentPassword(event, ${id})">
+      <div class="form-group">
+        <label>Password Baru</label>
+        <div class="password-toggle">
+          <input type="password" id="new-student-pwd" required placeholder="Masukkan password baru">
+          <button type="button" class="password-toggle-btn" onclick="togglePassword('new-student-pwd', this)">👁️</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Konfirmasi Password</label>
+        <div class="password-toggle">
+          <input type="password" id="confirm-student-pwd" required placeholder="Ketik ulang password">
+          <button type="button" class="password-toggle-btn" onclick="togglePassword('confirm-student-pwd', this)">👁️</button>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">Reset Password</button>
+      <button type="button" class="btn btn-secondary" onclick="closeModal()">Batal</button>
+    </form>
+  `
+        );
+      }
+
+      async function saveResetStudentPassword(e, id) {
+        e.preventDefault();
+        const pwd = document.getElementById('new-student-pwd').value;
+        const confirm = document.getElementById('confirm-student-pwd').value;
+
+        if (pwd !== confirm) {
+          alert('Password tidak cocok!');
+          return;
+        }
+
+        try {
+          const res = await fetch(`${api}/students/${id}/reset-password`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password: pwd }),
+          });
+          if (res.ok) {
+            alert('✅ Password berhasil direset!');
+            closeModal();
+          } else {
+            alert('❌ Gagal reset password');
+          }
+        } catch (e) {
+          alert('Error: ' + e.message);
+        }
+      }
+
+      async function deleteStudentAccount(id) {
+        if (!confirm('Hapus akun siswa ini? Data siswa tetap ada.')) return;
+        try {
+          const res = await fetch(`${api}/students/${id}/delete-account`, { method: 'DELETE' });
+          if (res.ok) {
+            alert('Akun berhasil dihapus!');
+            loadManageStudentAccounts();
+          }
+        } catch (e) {
+          alert('Error: ' + e.message);
+        }
+      }
+
+      // KELOLA GURU
+      async function loadManageTeachers() {
+        const main = document.getElementById('mainContent');
+        try {
+          const res = await fetch(`${api}/teachers`);
+          const guru = await res.json();
+
+          const tableHTML = guru
+            .map(
+              (t) => `
+          <tr class="teacher-account-row" data-nama="${t.nama.toLowerCase()}" data-email="${t.email}" data-spesialisasi="${t.spesialisasi}">
+            <td>${t.nama}</td>
+            <td>${t.email}</td>
+            <td>${t.spesialisasi || '-'}</td>
+            <td class="action-buttons">
+              <button class="btn btn-primary btn-sm" onclick="editTeacher(${t.id})">Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteTeacher(${t.id})">Hapus</button>
+            </td>
+          </tr>
+        `
+            )
+            .join('');
+
+          main.innerHTML = `
+<div class="content-body">
+  <h2 class="section-title">Kelola Akun Guru</h2>
+  <div class="search-box">
+    <input type="text" id="searchTeacherAccount" placeholder="🔍 Cari berdasarkan Nama, Email, atau Spesialisasi..." onkeyup="searchTable('teacher-account-row', 'searchTeacherAccount')">
+  </div>
+  <div style="margin-bottom:10px;color:#6b7280;" id="teacherAccountCount">Menampilkan ${guru.length} akun guru</div>
+  <table>
+    <thead><tr><th>Nama</th><th>Email</th><th>Spesialisasi</th><th>Aksi</th></tr></thead>
+    <tbody>${tableHTML || '<tr><td colspan="4" style="text-align:center;">Belum ada data</td></tr>'}</tbody>
+  </table>
+</div>`;
+        } catch (e) {
+          main.innerHTML = `<div style="color:red;padding:20px;">Error: ${e.message}</div>`;
+        }
+      }
+
+      async function editTeacher(id) {
+        try {
+          const res = await fetch(`${api}/teachers/${id}`);
+          const guru = await res.json();
+
+          showModal(
+            'Edit Akun Guru',
+            `
+      <form onsubmit="updateTeacher(event, ${id})">
+        <div class="form-group">
+          <label>Nama</label>
+          <input type="text" id="edit-teacher-nama" value="${guru.nama}" required
+         pattern="[a-zA-Z\s]+"
+         title="Nama hanya boleh berisi huruf"
+         oninput="this.value = this.value.replace(/[^a-zA-Z\s]/g, '')"
+         placeholder="Masukkan nama (hanya huruf)">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="edit-teacher-email" value="${guru.email}" required>
+        </div>
+        <div class="form-group">
+          <label>Spesialisasi</label>
+          <input type="text" id="edit-teacher-spesialisasi" value="${guru.spesialisasi || ''}">
+        </div>
+        <div class="form-group">
+          <label>Password Baru (kosongkan jika tidak ingin mengubah)</label>
+          <div class="password-toggle">
+            <input type="password" id="edit-teacher-password" placeholder="Masukkan password baru">
+            <button type="button" class="password-toggle-btn" onclick="togglePassword('edit-teacher-password', this)">👁️</button>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-success">Update</button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">Batal</button>
+      </form>
+    `
+          );
+        } catch (e) {
+          alert('Error: ' + e.message);
+        }
+      }
+
+      async function updateTeacher(e, id) {
+        e.preventDefault();
+        try {
+          const payload = {
+            nama: document.getElementById('edit-teacher-nama').value,
+            email: document.getElementById('edit-teacher-email').value,
+            spesialisasi: document.getElementById('edit-teacher-spesialisasi').value,
+          };
+
+          const pwd = document.getElementById('edit-teacher-password').value;
+          if (pwd) payload.password = pwd;
+
+          const res = await fetch(`${api}/teachers/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+
+          if (res.ok) {
+            alert('Akun guru berhasil diupdate!');
+            closeModal();
+            loadManageTeachers();
+          } else {
+            const data = await res.json();
+            alert(data.error || 'Gagal update');
+          }
+        } catch (e) {
+          alert('Error: ' + e.message);
+        }
+      }
+
+      async function deleteTeacher(id) {
+        if (!confirm('Hapus akun guru ini?')) return;
+        try {
+          const res = await fetch(`${api}/teachers/${id}`, { method: 'DELETE' });
+          if (res.ok) {
+            alert('Akun berhasil dihapus!');
+            loadManageTeachers();
+          }
+        } catch (e) {
+          alert('Error: ' + e.message);
+        }
+      }
+
+      function togglePassword(inputId, btn) {
+        const input = document.getElementById(inputId);
+        if (input.type === 'password') {
+          input.type = 'text';
+          btn.textContent = '🙈';
+        } else {
+          input.type = 'password';
+          btn.textContent = '👁️';
+        }
+      }
+
+      async function showCurrentPassword(id, type) {
+        alert(
+          '⚠️ Keamanan:\n\nPassword disimpan dalam bentuk terenkripsi dan tidak dapat ditampilkan.\n\nJika lupa password, silakan gunakan fitur "Password Baru" untuk menggantinya.'
+        );
+      }
+
+      // MODAL & UTILS
+      function showModal(title, content) {
+        document.getElementById('modal-title').textContent = title;
+        document.getElementById('modal-body').innerHTML = content;
+        document.getElementById('modal').style.display = 'block';
+      }
+
+      function closeModal() {
+        document.getElementById('modal').style.display = 'none';
+      }
+
+      function logout() {
+        localStorage.removeItem('user');
+        alert('Logout berhasil');
+        window.location.href = '/index.html';
+      }
+      function searchTable(rowClass, inputId) {
+        const input = document.getElementById(inputId);
+        const filter = input.value.toLowerCase();
+        const rows = document.getElementsByClassName(rowClass);
+        let visibleCount = 0;
+
+        for (let i = 0; i < rows.length; i++) {
+          const row = rows[i];
+          const searchText = Object.values(row.dataset).join(' ').toLowerCase();
+
+          if (searchText.includes(filter)) {
+            row.style.display = '';
+            visibleCount++;
+          } else {
+            row.style.display = 'none';
+          }
+        }
+
+        // Update counter
+        const countMap = {
+          'student-row': 'studentCount',
+          'class-row': 'classCount',
+          'student-account-row': 'studentAccountCount',
+          'teacher-row': 'teacherCount',
+        };
+
+        const counterId = countMap[rowClass];
+        if (counterId) {
+          const counter = document.getElementById(counterId);
+          if (counter) {
+            const label = {
+              'student-row': 'siswa',
+              'class-row': 'akun kelas',
+              'student-account-row': 'akun siswa',
+              'teacher-row': 'guru',
+            };
+            counter.textContent = `Menampilkan ${visibleCount} ${label[rowClass]}`;
+          }
+        }
+      }
+
+      function toggleMobileMenu() {
+        const sidebar = document.getElementById('adminSidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('active');
+      }
+
+      // ===== VALIDASI NAMA (HANYA HURUF) =====
+      function validateNameInput(inputId) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+
+        // Hapus angka dan karakter khusus, hanya izinkan huruf dan spasi
+        input.value = input.value.replace(/[^a-zA-Z\s]/g, '');
+
+        // Feedback visual jika ada input tidak valid
+        if (input.value !== input.value.replace(/[^a-zA-Z\s]/g, '')) {
+          input.style.borderColor = '#ef4444';
+          setTimeout(() => {
+            input.style.borderColor = '#d1d5db';
+          }, 1000);
+        }
+      }
+
+      // Event listener untuk semua input nama
+      document.addEventListener('DOMContentLoaded', function () {
+        // Tambahkan listener ke semua input yang ID-nya mengandung 'nama'
+        const nameInputs = document.querySelectorAll('input[id*="nama"], input[id*="name"]');
+        nameInputs.forEach((input) => {
+          input.addEventListener('input', function () {
+            this.value = this.value.replace(/[^a-zA-Z\s]/g, '');
+          });
+        });
+      });
+    </script>
+  </body>
+</html>
